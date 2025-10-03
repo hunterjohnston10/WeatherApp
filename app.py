@@ -37,6 +37,7 @@ if units == 'Metric':
         'pressure_msl': 'hPa',
         'wind_speed_10m': 'kph',
     }
+    temperature_string =  "\N{DEGREE SIGN}C"
 else:
     preferred_units = {
         'temperature_2m': 'degF',
@@ -44,6 +45,7 @@ else:
         'pressure_msl': 'inHg',
         'wind_speed_10m': 'mph',
     }
+    temperature_string = "\N{DEGREE SIGN}F"
 ureg.default_preferred_units = preferred_units
 pint_pandas.PintType.ureg = ureg
 
@@ -83,4 +85,5 @@ time_data = weather_data_window['timestamp_utc'].dt.tz_convert(tz=user_timezone)
 temp_data = weather_data_window['temperature_2m'].pint.magnitude
 
 fig = go.Figure(go.Scatter(x=time_data, y=temp_data))
+fig.update_layout(yaxis_title=temperature_string)
 st.plotly_chart(fig)
