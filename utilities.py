@@ -1,6 +1,5 @@
 import unified
 import pandas as pd
-from datetime import datetime, timezone
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"

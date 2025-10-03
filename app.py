@@ -3,7 +3,6 @@ import streamlit as st
 from streamlit_javascript import st_javascript
 from geopy.geocoders import Nominatim
 import pandas as pd
-import unified
 import utilities
 import plotly.graph_objects as go
 import pint
