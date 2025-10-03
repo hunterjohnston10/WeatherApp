@@ -1,2 +1,5 @@
 # ignore pyenv data file
 .python-version
+
+# ignore python specific files
+*.pyc
