@@ -1,17 +1,16 @@
 import unified
-import pint
 import pandas as pd
-import pint_pandas
 from datetime import datetime, timezone
-
-# define unit registry
-ureg = pint.UnitRegistry()
-ureg.load_definitions('weather_units.txt')
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
 
-def get_all_weather_data(location: str, start_date: str, end_date: str):
+def convert_weather_data(hourly_data, preferred_units):
+    for index, value in preferred_units.items():
+        hourly_data[index] = hourly_data[index].pint.to(value)
+    return hourly_data
+
+def get_all_weather_data(location: str, start_date: str, end_date: str, ureg):
     hourly_variables = [
         "temperature_2m",
         "relative_humidity_2m",
@@ -38,6 +37,8 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
                                      end_date)
         
         unit = ureg(data['units'][variable])
+
+        print(unit)
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
