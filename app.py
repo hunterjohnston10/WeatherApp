@@ -70,8 +70,7 @@ yesterday_time_utc = current_time_utc - day_delta
 
 weather_data = utilities.get_all_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
                                               utilities.to_timestamp(yesterday_time_utc),
-                                              utilities.to_timestamp(tomorrow_time_utc),
-                                              ureg)
+                                              utilities.to_timestamp(tomorrow_time_utc))
 weather_data = utilities.convert_weather_data(weather_data, preferred_units)
 
 # get pertinent weather data

@@ -1,5 +1,9 @@
 import unified
 import pandas as pd
+import pint
+import streamlit as st
+
+ureg = pint.UnitRegistry()
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
@@ -9,7 +13,8 @@ def convert_weather_data(hourly_data, preferred_units):
         hourly_data[index] = hourly_data[index].pint.to(value)
     return hourly_data
 
-def get_all_weather_data(location: str, start_date: str, end_date: str, ureg):
+@st.cache_data(ttl=60)
+def get_all_weather_data(location: str, start_date: str, end_date: str):
     hourly_variables = [
         "temperature_2m",
         "relative_humidity_2m",
