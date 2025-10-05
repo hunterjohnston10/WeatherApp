@@ -1,1 +1,5 @@
-index = 
+index = [UV_Index] = index 
+USAQI = [USA_AIR_QUALITY_INDEX] = USAQI
+wmo_code = [WEATHER_CODE] = wmo_code
+iso8601 = [ISO_DATETIME] = iso8601
+
