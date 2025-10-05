@@ -43,7 +43,6 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
 
     return all_data
 
-@st.cache_data(ttl=60)
 def get_all_weather_data(location: str, start_date: str, end_date: str):
     hourly_variables = [
         "temperature_2m",
