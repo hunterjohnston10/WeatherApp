@@ -110,3 +110,23 @@ def translate_weather_code(code):
         raise RuntimeError(f'Weather Code {code} not found')
     
     return translator[code]
+
+def translate_aqi(aqi):
+    aqi = int(aqi)
+
+    if aqi <= 50:
+        result = 'Good'
+    elif aqi <= 100:
+        result = 'Moderate'
+    elif aqi <= 150:
+        result = 'Unhealthy for Sensitive Groups'
+    elif aqi <= 200:
+        result = 'Unhealthy'
+    elif aqi <= 300:
+        result = 'Very Unhealthy'
+    elif aqi <= 500:
+        result = 'Hazardous'
+    else:
+        result = 'AQI could not be processed'
+
+    return result
