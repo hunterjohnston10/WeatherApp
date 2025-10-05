@@ -30,6 +30,7 @@ units = st.selectbox('Units Preference',
                      ('Metric', 'Conventional'))
 
 ureg = pint.UnitRegistry(autoconvert_to_preferred=True)
+ureg.load_definitions('weather_units.txt')
 if units == 'Metric':
     preferred_units = {
         'temperature_2m': 'degC',

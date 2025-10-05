@@ -4,6 +4,7 @@ import pint
 import streamlit as st
 
 ureg = pint.UnitRegistry()
+ureg.load_definitions('weather_units.txt')
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
@@ -13,22 +14,63 @@ def convert_weather_data(hourly_data, preferred_units):
         hourly_data[index] = hourly_data[index].pint.to(value)
     return hourly_data
 
+def get_sunrise(location: str, start_date: str, end_date: str):
+    pass
+
+def get_sunset(location: str, start_date: str, end_date: str):
+    pass
+
 @st.cache_data(ttl=60)
 def get_all_weather_data(location: str, start_date: str, end_date: str):
     hourly_variables = [
         "temperature_2m",
+        "apparent_temperature",
         "relative_humidity_2m",
         "precipitation",
+        "precipitation_probability",
+        "snowfall",
         "pressure_msl",
         "wind_speed_10m",
+        "wind_gusts_10m",
         "wind_direction_10m",
+        "visibility",
+        "cloud_cover",
+        "evapotranspiration",
+        "weather_code",
         "pm2_5",
         "pm10",
         "nitrogen_dioxide",
         "carbon_monoxide",
-        "ozone"
+        "ozone",
+        "sulphur_dioxide",
+        "carbon_dioxide",
+        "us_aqi",
+        "us_aqi_pm2_5",
+        "us_aqi_pm10",
+        "us_aqi_nitrogen_dioxide",
+        "us_aqi_ozone",
+        "us_aqi_sulphur_dioxide",
+        "us_aqi_carbon_monoxide"
     ]
-    daily_variables = ['uv_index_max']
+    daily_variables = [
+        'uv_index_max',
+        'temperature_2m_max',
+        'temperature_2m_min',
+        'apparent_temperature_max',
+        'apparent_temperature_min',
+        'precipitation_sum',
+        'rain_sum',
+        'showers_sum',
+        'snowfall_sum',
+        'precipitation_hours',
+        'precipitation_probability_max',
+        'precipitation_probability_mean',
+        'precipitation_probability_min',
+        'weather_code_daily',
+        'wind_speed_10m_max',
+        'wind_gusts_10m_max',
+        'wind_direction_10m_dominant'
+        ]
 
     hourly_data = pd.DataFrame()
     daily_data = pd.DataFrame()
@@ -40,11 +82,14 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
                                      start_date,
                                      end_date)
         
-        unit = ureg(data['units'][variable])
+        api_var = unified.VARIABLES[variable].api_var_name
+        units = data['units'][api_var].strip().replace(' ', '_')
+        unit = ureg(units)
 
         print(unit)
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
+        parsed_data = parsed_data.rename(columns={api_var: variable})
         parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
         parsed_data[variable] = parsed_data[variable].astype(f"pint[{unit}]")
 
@@ -60,9 +105,14 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
                                      start_date,
                                      end_date)
         
-        unit = ureg(data['units'][variable])
+        api_var = unified.VARIABLES[variable].api_var_name
+        units = data['units'][api_var].strip().replace(' ', '_')
+        unit = ureg(units)
+
+        print(unit)
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
+        parsed_data = parsed_data.rename(columns={api_var: variable})
         parsed_data['date'] = pd.to_datetime(parsed_data['date']).dt.tz_localize('UTC')
         parsed_data[variable] = parsed_data[variable].astype(f"pint[{unit}]")
 
