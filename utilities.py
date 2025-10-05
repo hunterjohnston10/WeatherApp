@@ -3,16 +3,19 @@ import pandas as pd
 import pint
 import streamlit as st
 
-ureg = pint.UnitRegistry()
-ureg.load_definitions('weather_units.txt')
-
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
 
-def convert_weather_data(hourly_data, preferred_units):
+def convert_weather_data(weather_data, weather_units, preferred_units):
+    # convert all data to pint units
+    for column in weather_data.columns:
+        try:
+            weather_data[column] = weather_data[column].astype(f"pint[{weather_units[column]}]")
+        except KeyError:
+            continue
     for index, value in preferred_units.items():
-        hourly_data[index] = hourly_data[index].pint.to(value)
-    return hourly_data
+        weather_data[index] = weather_data[index].pint.to(value)
+    return weather_data
 
 def get_sunrise_sunset(location: str, start_date: str, end_date: str):
     # get sunrise data
@@ -43,6 +46,7 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
 
     return all_data
 
+@st.cache_data(ttl=60)
 def get_all_weather_data(location: str, start_date: str, end_date: str):
     hourly_variables = [
         "temperature_2m",
@@ -95,7 +99,9 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         ]
 
     hourly_data = pd.DataFrame()
+    hourly_units = {}
     daily_data = pd.DataFrame()
+    daily_units = {}
 
     for variable in hourly_variables:
         data = unified.fetch_unified(variable, 
@@ -106,14 +112,13 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
-        unit = ureg(units)
+        hourly_units[variable] = units
 
-        print(unit)
+        print(f"{variable}: {units}")
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data = parsed_data.rename(columns={api_var: variable})
         parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
-        parsed_data[variable] = parsed_data[variable].astype(f"pint[{unit}]")
 
         if hourly_data.empty:
             hourly_data = parsed_data
@@ -129,21 +134,20 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
-        unit = ureg(units)
+        daily_units[variable] = units
 
-        print(unit)
+        print(f"{variable}: {units}")
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data = parsed_data.rename(columns={api_var: variable})
         parsed_data['date'] = pd.to_datetime(parsed_data['date']).dt.tz_localize('UTC')
-        parsed_data[variable] = parsed_data[variable].astype(f"pint[{unit}]")
 
         if daily_data.empty:
             daily_data = parsed_data
         else:
             daily_data = daily_data.merge(parsed_data, how='outer', on='date')
     
-    return hourly_data
+    return hourly_data, hourly_units, daily_data, daily_units
 
 def translate_weather_code(code):
     translator = {

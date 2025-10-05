@@ -73,10 +73,10 @@ sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coo
                                               utilities.to_timestamp(yesterday_time_utc),
                                               utilities.to_timestamp(tomorrow_time_utc))
 
-weather_data = utilities.get_all_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
                                               utilities.to_timestamp(yesterday_time_utc),
                                               utilities.to_timestamp(tomorrow_time_utc))
-weather_data = utilities.convert_weather_data(weather_data, preferred_units)
+weather_data = utilities.convert_weather_data(hourly_weather_data, hourly_weather_units, preferred_units)
 
 
 
