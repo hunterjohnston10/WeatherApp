@@ -326,7 +326,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         param_kind="daily",
         api_var_name="precipitation_probability_min",
     ),
-    "weather_code": VariableSpec(
+    "weather_code_daily": VariableSpec(
         category="weather",
         historical_url=OPEN_METEO_WEATHER_ARCHIVE,
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
