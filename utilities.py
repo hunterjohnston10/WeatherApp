@@ -14,11 +14,34 @@ def convert_weather_data(hourly_data, preferred_units):
         hourly_data[index] = hourly_data[index].pint.to(value)
     return hourly_data
 
-def get_sunrise(location: str, start_date: str, end_date: str):
-    pass
+def get_sunrise_sunset(location: str, start_date: str, end_date: str):
+    # get sunrise data
+    data = unified.fetch_unified('sunrise', 
+                                location,
+                                'both',
+                                start_date,
+                                end_date)
+    api_var = unified.VARIABLES['sunrise'].api_var_name
+    sunrise_data = pd.DataFrame.from_dict(data['data'])
+    sunrise_data = sunrise_data.rename(columns={api_var: 'sunrise'})
+    sunrise_data['date'] = pd.to_datetime(sunrise_data['date']).dt.tz_localize('UTC')
+    sunrise_data['sunrise'] = pd.to_datetime(sunrise_data['sunrise']).dt.tz_localize('UTC')
 
-def get_sunset(location: str, start_date: str, end_date: str):
-    pass
+    # get sunset data
+    data = unified.fetch_unified('sunset', 
+                                location,
+                                'both',
+                                start_date,
+                                end_date)
+    api_var = unified.VARIABLES['sunset'].api_var_name
+    sunset_data = pd.DataFrame.from_dict(data['data'])
+    sunset_data = sunset_data.rename(columns={api_var: 'sunset'})
+    sunset_data['date'] = pd.to_datetime(sunset_data['date']).dt.tz_localize('UTC')
+    sunset_data['sunset'] = pd.to_datetime(sunset_data['sunset']).dt.tz_localize('UTC')
+
+    all_data = sunrise_data.merge(sunset_data, how='outer', on='date')
+
+    return all_data
 
 @st.cache_data(ttl=60)
 def get_all_weather_data(location: str, start_date: str, end_date: str):
