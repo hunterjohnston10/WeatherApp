@@ -14,7 +14,10 @@ def convert_weather_data(weather_data, weather_units, preferred_units):
         except KeyError:
             continue
     for index, value in preferred_units.items():
-        weather_data[index] = weather_data[index].pint.to(value)
+        try:
+            weather_data[index] = weather_data[index].pint.to(value)
+        except KeyError:
+            continue
     return weather_data
 
 def get_sunrise_sunset(location: str, start_date: str, end_date: str):

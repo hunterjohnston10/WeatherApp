@@ -107,8 +107,10 @@ hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_uni
                                               utilities.to_timestamp(yesterday_time_utc),
                                               utilities.to_timestamp(tomorrow_time_utc))
 weather_data = utilities.convert_weather_data(hourly_weather_data, hourly_weather_units, preferred_units)
+weather_data_daily = utilities.convert_weather_data(daily_weather_data, daily_weather_units, preferred_units)
 
-
+st.dataframe(weather_data.values, column_config={(i+1): c for i, c in enumerate(weather_data.columns)})
+st.dataframe(daily_weather_data.values, column_config={(i+1): c for i, c in enumerate(daily_weather_data.columns)})
 
 # get pertinent weather data
 time_window_min = current_time_utc - day_delta
