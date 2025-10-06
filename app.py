@@ -131,7 +131,7 @@ temp_data = weather_data_window['temperature_2m'].pint.magnitude
 fig = go.Figure(go.Scatter(x=time_data, y=temp_data))
 fig.update_layout(yaxis_title=temperature_string)
 fig.update_xaxes(
-    dtick='D1',
+    dtick=3600000*12, # 12 hour intervals
     tickformat="%b %d %y %I:%M:%S %p"
 )
 st.plotly_chart(fig)
