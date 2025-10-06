@@ -37,6 +37,21 @@ if units == 'Metric':
         'precipitation': 'mm',
         'pressure_msl': 'hPa',
         'wind_speed_10m': 'kph',
+        'apparent_temperature': 'degC',
+        'snowfall': 'cm',
+        'wind_gusts_10m': 'kph',
+        'visibility': 'kilometers',
+        'evapotranspiration': 'mm',
+        'temperature_2m_max': 'degC',
+        'temperature_2m_min': 'degC',
+        'apparent_temperature_max': 'degC',
+        'apparent_temperature_min': 'degC',
+        'precipitation_sum': 'mm',
+        'rain_sum': 'mm',
+        'showers_sum': 'mm',
+        'snowfall_sum': 'cm',
+        'wind_speed_10m_max': 'kph',
+        'wind_gusts_10m_max': 'kph',
     }
     temperature_string =  "\N{DEGREE SIGN}C"
 else:
@@ -45,6 +60,21 @@ else:
         'precipitation': 'in',
         'pressure_msl': 'inHg',
         'wind_speed_10m': 'mph',
+        'apparent_temperature': 'degF',
+        'snowfall': 'in',
+        'wind_gusts_10m': 'mph',
+        'visibility': 'miles',
+        'evapotranspiration': 'in',
+        'temperature_2m_max': 'degF',
+        'temperature_2m_min': 'degF',
+        'apparent_temperature_max': 'degF',
+        'apparent_temperature_min': 'degF',
+        'precipitation_sum': 'in',
+        'rain_sum': 'in',
+        'showers_sum': 'in',
+        'snowfall_sum': 'in',
+        'wind_speed_10m_max': 'mph',
+        'wind_gusts_10m_max': 'mph',
     }
     temperature_string = "\N{DEGREE SIGN}F"
 ureg.default_preferred_units = preferred_units
