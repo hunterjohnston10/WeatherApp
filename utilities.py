@@ -6,6 +6,9 @@ import streamlit as st
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
 
+def to_12_hr_format(datetime_object):
+    return datetime_object.strftime("%b %d %y %I:%M:%S %p")
+
 def convert_weather_data(weather_data, weather_units, preferred_units):
     # convert all data to pint units
     for column in weather_data.columns:
@@ -48,6 +51,115 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
     all_data = sunrise_data.merge(sunset_data, how='outer', on='date')
 
     return all_data
+
+@st.cache_data(ttl=900) # 15 minute cache
+def get_daily_weather_data(location, start_date, end_date):
+    daily_variables = [
+        'uv_index_max',
+        'temperature_2m_max',
+        'temperature_2m_min',
+        'apparent_temperature_max',
+        'apparent_temperature_min',
+        'precipitation_sum',
+        'rain_sum',
+        'showers_sum',
+        'snowfall_sum',
+        'precipitation_hours',
+        'precipitation_probability_max',
+        'precipitation_probability_mean',
+        'precipitation_probability_min',
+        'weather_code_daily',
+        'wind_speed_10m_max',
+        'wind_gusts_10m_max',
+        'wind_direction_10m_dominant'
+        ]
+    
+    daily_data = pd.DataFrame()
+    daily_units = {}
+    
+    for variable in daily_variables:
+        data = unified.fetch_unified(variable, 
+                                     location,
+                                     'both',
+                                     start_date,
+                                     end_date)
+        
+        api_var = unified.VARIABLES[variable].api_var_name
+        units = data['units'][api_var].strip().replace(' ', '_')
+        daily_units[variable] = units
+
+        print(f"{variable}: {units}")
+
+        parsed_data = pd.DataFrame.from_dict(data['data'])
+        parsed_data = parsed_data.rename(columns={api_var: variable})
+        parsed_data['date'] = pd.to_datetime(parsed_data['date']).dt.tz_localize('UTC')
+
+        if daily_data.empty:
+            daily_data = parsed_data
+        else:
+            daily_data = daily_data.merge(parsed_data, how='outer', on='date')
+
+    return daily_data, daily_units
+    
+@st.cache_data(ttl=900)  # 15 minute cache
+def get_hourly_weather_data(location, start_date, end_date):
+    hourly_variables = [
+        "temperature_2m",
+        "apparent_temperature",
+        "relative_humidity_2m",
+        "precipitation",
+        "precipitation_probability",
+        "snowfall",
+        "pressure_msl",
+        "wind_speed_10m",
+        "wind_gusts_10m",
+        "wind_direction_10m",
+        "visibility",
+        "cloud_cover",
+        "evapotranspiration",
+        "weather_code",
+        "pm2_5",
+        "pm10",
+        "nitrogen_dioxide",
+        "carbon_monoxide",
+        "ozone",
+        "sulphur_dioxide",
+        "carbon_dioxide",
+        "us_aqi",
+        "us_aqi_pm2_5",
+        "us_aqi_pm10",
+        "us_aqi_nitrogen_dioxide",
+        "us_aqi_ozone",
+        "us_aqi_sulphur_dioxide",
+        "us_aqi_carbon_monoxide"
+    ]
+
+    hourly_data = pd.DataFrame()
+    hourly_units = {}
+
+    for variable in hourly_variables:
+        data = unified.fetch_unified(variable, 
+                                     location,
+                                     'both',
+                                     start_date,
+                                     end_date)
+        
+        api_var = unified.VARIABLES[variable].api_var_name
+        units = data['units'][api_var].strip().replace(' ', '_')
+        hourly_units[variable] = units
+
+        print(f"{variable}: {units}")
+
+        parsed_data = pd.DataFrame.from_dict(data['data'])
+        parsed_data = parsed_data.rename(columns={api_var: variable})
+        parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
+
+        if hourly_data.empty:
+            hourly_data = parsed_data
+        else:
+            hourly_data = hourly_data.merge(parsed_data, how='outer', on='timestamp_utc')
+
+    return hourly_data, hourly_units
 
 @st.cache_data(ttl=900)  # 15 minute cache
 def get_all_weather_data(location: str, start_date: str, end_date: str):

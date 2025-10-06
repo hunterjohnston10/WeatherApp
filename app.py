@@ -94,26 +94,31 @@ coordinates_df = pd.DataFrame([[coordinates.latitude, coordinates.longitude]], c
 # plot location on map
 st.map(coordinates_df)
 
-# get weather data
+# determine useful times
 current_time_utc = pd.Timestamp.utcnow()
 tomorrow_time_utc = current_time_utc + day_delta
 yesterday_time_utc = current_time_utc - day_delta
 
+# get today daily weather data
 sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coordinates.longitude}",
                                               utilities.to_timestamp(yesterday_time_utc),
                                               utilities.to_timestamp(tomorrow_time_utc))
-
-hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
                                               utilities.to_timestamp(yesterday_time_utc),
                                               utilities.to_timestamp(tomorrow_time_utc))
-weather_data = utilities.convert_weather_data(hourly_weather_data, hourly_weather_units, preferred_units)
 weather_data_daily = utilities.convert_weather_data(daily_weather_data, daily_weather_units, preferred_units)
 
 st.dataframe(sunrise_sunset_data)
-st.dataframe(weather_data.values, column_config={(i+1): c for i, c in enumerate(weather_data.columns)})
 st.dataframe(daily_weather_data.values, column_config={(i+1): c for i, c in enumerate(daily_weather_data.columns)})
 
-# get pertinent weather data
+# get hourly weather data
+hourly_weather_data, hourly_weather_units = utilities.get_hourly_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+                                              utilities.to_timestamp(yesterday_time_utc),
+                                              utilities.to_timestamp(tomorrow_time_utc))
+weather_data = utilities.convert_weather_data(hourly_weather_data, hourly_weather_units, preferred_units)
+
+st.dataframe(weather_data.values, column_config={(i+1): c for i, c in enumerate(weather_data.columns)})
+
 time_window_min = current_time_utc - day_delta
 time_window_max = current_time_utc + day_delta
 
@@ -125,4 +130,8 @@ temp_data = weather_data_window['temperature_2m'].pint.magnitude
 
 fig = go.Figure(go.Scatter(x=time_data, y=temp_data))
 fig.update_layout(yaxis_title=temperature_string)
+fig.update_xaxes(
+    dtick='D1',
+    tickformat="%b %d %y %I:%M:%S %p"
+)
 st.plotly_chart(fig)
