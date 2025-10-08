@@ -439,7 +439,7 @@ def generate_current_summary(current_data):
 
             with c2:
                 st.metric(
-                    "Apparent High/Low",
+                    "Apparent Temperature",
                     f'{current_data["apparent_temperature"].magnitude:.1f} {temperature_unit}',
                     width='content'
                 )
