@@ -2,6 +2,7 @@ import unified
 import pandas as pd
 import pint
 import streamlit as st
+import plotly.graph_objects as go
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
@@ -521,3 +522,29 @@ def generate_current_summary(current_data):
                 )     
 
     return container
+
+def create_aqi_plot(aqi_data, title):
+
+    fig = go.Figure(go.Indicator(
+        mode = "gauge+number",
+        value = aqi_data,
+        domain = {'x': [0, 1], 'y': [0, 1]},
+        title = {'text': title, 'font': {'size': 24}},
+        gauge = {
+            'axis': {'range': [None, 500], 'tickwidth': 1, 'tickcolor': "black"},
+            'bar': {'color': "darkblue"},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "gray",
+            'steps': [
+                {'range': [0, 50], 'color': 'green'},
+                {'range': [50, 100], 'color': 'yellow'},
+                {'range': [100, 150], 'color': 'orange'},
+                {'range': [150, 200], 'color': 'red'},
+                {'range': [200, 300], 'color': 'magenta'},
+                {'range': [300, 500], 'color': 'brown'},],
+            }))
+
+    fig.update_layout(font = {'color': "black", 'family': "Arial"})
+
+    return fig

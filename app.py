@@ -180,20 +180,4 @@ utilities.write_centered(
     header='h2')
 
 utilities.generate_current_summary(this_hour_data)
-
-time_window_min = current_time_local - day_delta
-time_window_max = current_time_local + day_delta
-
-weather_data_window = weather_data[(weather_data['timestamp_utc'] <= time_window_max) & 
-                                   (weather_data['timestamp_utc'] >= time_window_min)]
-
-time_data = weather_data_window['timestamp_utc'].dt.tz_convert(tz=user_timezone)
-temp_data = weather_data_window['temperature_2m'].pint.magnitude
-
-fig = go.Figure(go.Scatter(x=time_data, y=temp_data))
-fig.update_layout(yaxis_title=temperature_string)
-fig.update_xaxes(
-    dtick=3600000*12, # 12 hour intervals
-    tickformat="%b %d %y %I:%M:%S %p"
-)
-st.plotly_chart(fig)
+st.plotly_chart(utilities.create_aqi_plot(this_hour_data['us_aqi'].magnitude, 'AQI'))
