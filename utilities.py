@@ -7,9 +7,34 @@ def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
 
 def to_12_hr_format(datetime_object):
-    return datetime_object.strftime("%b %d %y %I:%M:%S %p")
+    return datetime_object.strftime("%I:%M:%S %p")
 
-def convert_weather_data(weather_data, weather_units, preferred_units):
+def write_centered(content, header='span'):
+    return st.markdown(f"<{header} style='text-align: center'>{content}</{header}>", unsafe_allow_html=True)
+
+def write_left(content, header='span'):
+    return st.markdown(f"<{header} style='text-align: left'>{content}</{header}>", unsafe_allow_html=True)
+
+def write_right(content, header='span'):
+    return st.markdown(f"<{header} style='text-align: right'>{content}</{header}>", unsafe_allow_html=True)
+
+def pretty_print_unit(quantity):
+    return f"{quantity.units:~#P}"
+
+def convert_weather_data(input_weather_data, weather_units, preferred_units, tz=None):
+    weather_data = input_weather_data.copy()
+
+    if tz is not None:
+        try:
+            weather_data['timestamp_utc'] = weather_data['timestamp_utc'].dt.tz_convert(tz=tz)
+        except KeyError:
+            pass
+
+        try:
+            weather_data['date'] = weather_data['date'].dt.tz_convert(tz=tz)
+        except KeyError:
+            pass
+    
     # convert all data to pint units
     for column in weather_data.columns:
         try:
@@ -88,8 +113,6 @@ def get_daily_weather_data(location, start_date, end_date):
         units = data['units'][api_var].strip().replace(' ', '_')
         daily_units[variable] = units
 
-        print(f"{variable}: {units}")
-
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data = parsed_data.rename(columns={api_var: variable})
         parsed_data['date'] = pd.to_datetime(parsed_data['date']).dt.tz_localize('UTC')
@@ -147,8 +170,6 @@ def get_hourly_weather_data(location, start_date, end_date):
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
         hourly_units[variable] = units
-
-        print(f"{variable}: {units}")
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data = parsed_data.rename(columns={api_var: variable})
@@ -229,8 +250,6 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         units = data['units'][api_var].strip().replace(' ', '_')
         hourly_units[variable] = units
 
-        print(f"{variable}: {units}")
-
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data = parsed_data.rename(columns={api_var: variable})
         parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
@@ -250,8 +269,6 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
         daily_units[variable] = units
-
-        print(f"{variable}: {units}")
 
         parsed_data = pd.DataFrame.from_dict(data['data'])
         parsed_data = parsed_data.rename(columns={api_var: variable})
@@ -321,3 +338,186 @@ def translate_aqi(aqi):
         result = 'AQI could not be processed'
 
     return result
+
+def generate_daily_summary(day_data):
+    temperature_unit = pretty_print_unit(day_data['temperature_2m_max'])
+    rain_unit = pretty_print_unit(day_data['rain_sum'])
+    snow_unit = pretty_print_unit(day_data['snowfall_sum'])
+    wind_unit = pretty_print_unit(day_data['wind_speed_10m_max'])
+
+    container = st.container()
+    with container:
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "High/Low",
+                    f'{day_data["temperature_2m_max"].magnitude:.1f}/{day_data["temperature_2m_min"].magnitude:.1f} {temperature_unit}',
+                    width='content'
+                )
+
+            with c2:
+                st.metric(
+                    "Apparent High/Low",
+                    f'{day_data["apparent_temperature_max"].magnitude:.1f}/{day_data["apparent_temperature_min"].magnitude:.1f} {temperature_unit}',
+                    width='content'
+                )
+
+            with c3:
+                st.metric(
+                    "Precip. Prob. High/Mean/Low",
+                    f'{day_data["precipitation_probability_max"].magnitude:.0f}/{day_data["precipitation_probability_mean"].magnitude:.0f}/{day_data["precipitation_probability_min"].magnitude:.0f} %',
+                    width='content'
+                )
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Precipitation",
+                    f"{day_data['precipitation_sum'].magnitude:.2f} {rain_unit}",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Snow",
+                    f"{day_data['snowfall_sum'].magnitude:.2f} {snow_unit}",
+                    width='content'
+                )     
+
+            with c3:
+                st.metric(
+                    "UV Index",
+                    f"{day_data['uv_index_max'].magnitude:.1f}",
+                    width='content'
+                )   
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Max Windspeed",
+                    f"{day_data['wind_speed_10m_max'].magnitude:.2f} {wind_unit}",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Max Gust",
+                    f"{day_data['wind_gusts_10m_max'].magnitude:.2f} {wind_unit}",
+                    width='content'
+                )     
+
+            with c3:
+                st.metric(
+                    "Dominant Wind Direction",
+                    f"{day_data['wind_direction_10m_dominant'].magnitude:.1f}\N{DEGREE SIGN}",
+                    width='content'
+                )   
+
+    return container
+
+def generate_current_summary(current_data):
+    temperature_unit = pretty_print_unit(current_data['temperature_2m'])
+    rain_unit = pretty_print_unit(current_data['precipitation'])
+    snow_unit = pretty_print_unit(current_data['snowfall'])
+    wind_unit = pretty_print_unit(current_data['wind_speed_10m'])
+    visibility_unit = pretty_print_unit(current_data['visibility'])
+    pressure_unit = pretty_print_unit(current_data['pressure_msl'])
+
+    container = st.container()
+    with container:
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Current Temperature",
+                    f'{current_data["temperature_2m"].magnitude:.1f} {temperature_unit}',
+                    width='content'
+                )
+
+            with c2:
+                st.metric(
+                    "Apparent High/Low",
+                    f'{current_data["apparent_temperature"].magnitude:.1f} {temperature_unit}',
+                    width='content'
+                )
+
+            with c3:
+                st.metric(
+                    "Precip. Prob.",
+                    f'{current_data["precipitation_probability"].magnitude:.0f} %',
+                    width='content'
+                )
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Precipitation",
+                    f"{current_data['precipitation'].magnitude:.2f} {rain_unit}",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Snow",
+                    f"{current_data['snowfall'].magnitude:.2f} {snow_unit}",
+                    width='content'
+                )     
+
+            with c3:
+                st.metric(
+                    "Visibility",
+                    f"{current_data['visibility'].magnitude:.1f} {visibility_unit}",
+                    width='content'
+                )   
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Windspeed",
+                    f"{current_data['wind_speed_10m'].magnitude:.2f} {wind_unit}",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Gusts",
+                    f"{current_data['wind_gusts_10m'].magnitude:.2f} {wind_unit}",
+                    width='content'
+                )     
+
+            with c3:
+                st.metric(
+                    "Wind Direction",
+                    f"{current_data['wind_direction_10m'].magnitude:.1f}\N{DEGREE SIGN}",
+                    width='content'
+                ) 
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Relative Humidity",
+                    f"{current_data['relative_humidity_2m'].magnitude:.2f} %",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Pressure",
+                    f"{current_data['pressure_msl'].magnitude:.2f} {pressure_unit}",
+                    width='content'
+                )     
+
+            with c3:
+                st.metric(
+                    "Cloud Cover",
+                    f"{current_data['cloud_cover'].magnitude:.1f} %",
+                    width='content'
+                )     
+
+    return container
