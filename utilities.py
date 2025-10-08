@@ -399,14 +399,14 @@ def generate_daily_summary(day_data):
             with c1:
                 st.metric(
                     "Max Windspeed",
-                    f"{day_data['wind_speed_10m_max'].magnitude:.2f} {wind_unit}",
+                    f"{day_data['wind_speed_10m_max'].magnitude:.1f} {wind_unit}",
                     width='content'
                 )  
 
             with c2:
                 st.metric(
                     "Max Gust",
-                    f"{day_data['wind_gusts_10m_max'].magnitude:.2f} {wind_unit}",
+                    f"{day_data['wind_gusts_10m_max'].magnitude:.1f} {wind_unit}",
                     width='content'
                 )     
 
@@ -480,14 +480,14 @@ def generate_current_summary(current_data):
             with c1:
                 st.metric(
                     "Windspeed",
-                    f"{current_data['wind_speed_10m'].magnitude:.2f} {wind_unit}",
+                    f"{current_data['wind_speed_10m'].magnitude:.1f} {wind_unit}",
                     width='content'
                 )  
 
             with c2:
                 st.metric(
                     "Gusts",
-                    f"{current_data['wind_gusts_10m'].magnitude:.2f} {wind_unit}",
+                    f"{current_data['wind_gusts_10m'].magnitude:.1f} {wind_unit}",
                     width='content'
                 )     
 
@@ -503,14 +503,14 @@ def generate_current_summary(current_data):
             with c1:
                 st.metric(
                     "Relative Humidity",
-                    f"{current_data['relative_humidity_2m'].magnitude:.2f} %",
+                    f"{current_data['relative_humidity_2m'].magnitude:.1f} %",
                     width='content'
                 )  
 
             with c2:
                 st.metric(
                     "Pressure",
-                    f"{current_data['pressure_msl'].magnitude:.2f} {pressure_unit}",
+                    f"{current_data['pressure_msl'].magnitude:.1f} {pressure_unit}",
                     width='content'
                 )     
 
