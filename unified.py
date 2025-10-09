@@ -3,7 +3,7 @@ import json
 import os
 from dataclasses import dataclass
 from datetime import datetime, timedelta, UTC
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 import requests
 
@@ -429,58 +429,81 @@ def _year_chunks(start: datetime, end: datetime) -> List[Tuple[datetime, datetim
     return merged
 
 
-def _fetch_segment(lat: float, lon: float, spec: VariableSpec, start: datetime, end: datetime, is_history: bool) -> Dict:
-    url = spec.historical_url if is_history else spec.forecast_url
-    params: Dict[str, str] = {
+def _fetch_segment(lat: float, lon: float, spec: List[VariableSpec],
+                    start: datetime, end: datetime, is_history: bool, url: str) -> Dict:
+
+    params = {
         "latitude": f"{lat}",
         "longitude": f"{lon}",
         "timezone": "UTC",
         "start_date": start.strftime("%Y-%m-%d"),
         "end_date": end.strftime("%Y-%m-%d"),
     }
-    if spec.param_kind == "hourly":
-        params["hourly"] = spec.api_var_name
-    else:
-        params["daily"] = spec.api_var_name
-    # For explicit historical air-quality, hint CAMS domain
-    if spec.category == "air_quality" and is_history:
-        params["domains"] = "cams_global"
+    hourly_vars = []
+    daily_vars = []
+    for s in spec:
+        if s.param_kind == "hourly":
+            hourly_vars.append(s.api_var_name)
+        else:
+            daily_vars.append(s.api_var_name)
+        # For explicit historical air-quality, hint CAMS domain
+        if s.category == "air_quality" and is_history:
+            params["domains"] = "cams_global"
+    if len(hourly_vars) > 0:
+        params['hourly'] = hourly_vars
+    if len(daily_vars) > 0:
+        params['daily'] = daily_vars
     return _request(url, params)
 
 
-def _merge_results(spec: VariableSpec, parts: List[Dict]) -> Dict:
+def _merge_results(spec: List[VariableSpec], parts: List[Dict]) -> Dict:
     if not parts:
         return {}
     # Initialize with first part
     base = {k: v for k, v in parts[0].items()}
-    if spec.param_kind == "hourly":
-        key = "hourly"
-        units_key = "hourly_units"
-    else:
-        key = "daily"
-        units_key = "daily_units"
-    if key not in base:
-        base[key] = {}
-    if units_key not in base:
-        base[units_key] = {}
+    keys = ['hourly', 'daily']
+    units_keys = ['hourly_units', 'daily_units']
+
+    for key in keys:
+        if key not in base:
+            base[key] = {}
+    for units_key in units_keys:
+        if units_key not in base:
+            base[units_key] = {}
     # Merge others
     for p in parts[1:]:
-        if key in p:
-            for k, arr in p[key].items():
-                if k in base[key]:
-                    base[key][k].extend(arr)
-                else:
-                    base[key][k] = list(arr)
-        if units_key in p:
-            base[units_key].update(p[units_key])
+        for key in keys:
+            if key in p:
+                for k, arr in p[key].items():
+                    if k in base[key]:
+                        base[key][k].extend(arr)
+                    else:
+                        base[key][k] = list(arr)
+                    if k == 'time':
+                        base[key][k] = list(dict.fromkeys(base[key][k])) # only keep new unique times, could be faster?
+        for units_key in units_keys:
+            if units_key in p:
+                base[units_key].update(p[units_key])
     return base
 
+def _split_vars_by_urls(vars: List[VariableSpec], is_history: bool):
+    split_vars = {}
+    for v in vars:
+        url = v.historical_url if is_history else v.forecast_url
+        try:
+            split_vars[url].append(v)
+        except KeyError:
+            split_vars[url] = [v]
+    return split_vars
 
 def fetch_unified(variable: str, location: str, mode: str, start_date: str, end_date: str) -> Dict:
-    var = variable.strip()
-    if var not in VARIABLES:
-        raise ValueError(f"Unknown variable '{var}'. Supported: {', '.join(sorted(VARIABLES.keys()))}")
-    spec = VARIABLES[var]
+    var = variable.strip().split(',')
+    spec = []
+    for v in var:
+        if v not in VARIABLES:
+            raise ValueError(f"Unknown variable '{v}'. Supported: {', '.join(sorted(VARIABLES.keys()))}")
+        else:
+            spec.append(VARIABLES[v])
 
     lat, lon = _parse_location(location)
     s = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=UTC)
@@ -500,50 +523,59 @@ def fetch_unified(variable: str, location: str, mode: str, start_date: str, end_
 
     # Historical segment(s)
     if want_history and s < today:
+        split_vars_hist = _split_vars_by_urls(spec, is_history=True)
         hist_end = min(e, today - timedelta(days=1))
         if s <= hist_end:
-            for cs, ce in _year_chunks(s, hist_end):
-                parts.append(_fetch_segment(lat, lon, spec, cs, ce, is_history=True))
+            for url, vars in split_vars_hist.items():
+                for cs, ce in _year_chunks(s, hist_end):
+                    parts.append(_fetch_segment(lat, lon, vars, cs, ce, is_history=True, url=url))
 
     # Forecast segment
     if want_forecast and e >= today:
+        split_vars_fc = _split_vars_by_urls(spec, is_history=False)
         fc_start = max(s, today)
         if fc_start <= e:
-            parts.append(_fetch_segment(lat, lon, spec, fc_start, e, is_history=False))
+            for url, vars in split_vars_fc.items():
+                parts.append(_fetch_segment(lat, lon, vars, fc_start, e, is_history=False, url=url))
 
     if not parts:
         return {"error": "Requested time range produced no segments to query."}
 
     merged = _merge_results(spec, parts)
 
+    data = {'hourly': [], 'daily': []}
+    units = {}
+
     # Normalize to unified schema
-    if spec.param_kind == "hourly":
+    if merged['hourly']:
         data_key = "hourly"
         units_key = "hourly_units"
         time_field = "time"
-        value_field = spec.api_var_name
+        value_fields = [s.api_var_name for s in spec if s.param_kind == 'hourly']
         times = merged.get(data_key, {}).get(time_field, [])
-        values = merged.get(data_key, {}).get(value_field, [])
-        rows = []
+        values = {}
+        for value_field in value_fields:
+            values[value_field] = merged.get(data_key, {}).get(value_field, [])
         for i, t in enumerate(times):
-            rows.append({"timestamp_utc": t, value_field: values[i] if i < len(values) else None})
-        units = merged.get(units_key, {})
-    else:
+            data['hourly'].append(dict({"timestamp_utc": t} | {value_field: values[value_field][i] if i < len(values[value_field]) else None for value_field in value_fields}))
+        units |= merged.get(units_key, {})
+    if merged['daily']:
         data_key = "daily"
         units_key = "daily_units"
         time_field = "time"
-        value_field = spec.api_var_name
+        value_fields = [s.api_var_name for s in spec if s.param_kind == 'daily']
         times = merged.get(data_key, {}).get(time_field, [])
-        values = merged.get(data_key, {}).get(value_field, [])
-        rows = []
+        values = {}
+        for value_field in value_fields:
+            values[value_field] = merged.get(data_key, {}).get(value_field, [])
         for i, d in enumerate(times):
-            rows.append({"date": d, value_field: values[i] if i < len(values) else None})
-        units = merged.get(units_key, {})
+            data['daily'].append(dict({"date": d} | {value_field: values[value_field][i] if i < len(values[value_field]) else None for value_field in value_fields}))
+        units |= merged.get(units_key, {})
 
     result = {
         "metadata": {
             "variable": var,
-            "category": spec.category,
+            "category": [s.category for s in spec],
             "location": {"latitude": lat, "longitude": lon},
             "mode": mode_norm,
             "start_date": start_date,
@@ -552,7 +584,7 @@ def fetch_unified(variable: str, location: str, mode: str, start_date: str, end_
             "source": "open-meteo",
         },
         "units": units,
-        "data": rows,
+        "data": data,
     }
     return result
 
