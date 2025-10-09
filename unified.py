@@ -232,6 +232,29 @@ VARIABLES: Dict[str, VariableSpec] = {
         api_var_name="us_aqi_carbon_monoxide",
     ),
 
+    # sun radiation (hourly)
+    "direct_radiation": VariableSpec(
+        category="uv",
+        historical_url=OPEN_METEO_WEATHER_ARCHIVE,  # Open-Meteo allows historical via forecast endpoint for ERA5
+        forecast_url=OPEN_METEO_WEATHER_FORECAST,
+        param_kind="hourly",
+        api_var_name="direct_radiation",
+    ),
+    "direct_normal_irradiance": VariableSpec(
+        category="uv",
+        historical_url=OPEN_METEO_WEATHER_ARCHIVE,  # Open-Meteo allows historical via forecast endpoint for ERA5
+        forecast_url=OPEN_METEO_WEATHER_FORECAST,
+        param_kind="hourly",
+        api_var_name="direct_normal_irradiance",
+    ),
+    "diffuse_radiation": VariableSpec(
+        category="uv",
+        historical_url=OPEN_METEO_WEATHER_ARCHIVE,  # Open-Meteo allows historical via forecast endpoint for ERA5
+        forecast_url=OPEN_METEO_WEATHER_FORECAST,
+        param_kind="hourly",
+        api_var_name="diffuse_radiation",
+    ),
+
     # UV (daily)
     "uv_index_max": VariableSpec(
         category="uv",
