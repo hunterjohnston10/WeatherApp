@@ -2,7 +2,6 @@ from zoneinfo import ZoneInfo
 import streamlit as st
 import streamlit.components.v1 as components
 from streamlit_javascript import st_javascript
-from geopy.geocoders import Nominatim
 import pandas as pd
 import utilities
 import plotly.graph_objects as go
@@ -17,7 +16,7 @@ tf = TimezoneFinder()
 pd.options.plotting.backend = 'plotly'
 
 # create Nominatim geocoder
-geocoder = Nominatim(user_agent='ASDL-Weather-App')
+geocoder = utilities.generate_geocoder()
 
 # create useful time deltas
 day_delta = pd.Timedelta(1, 'day')
@@ -87,7 +86,7 @@ location = st.text_input('Location (Street Address, Zip Code, etc.):',
                          label_visibility='hidden')
 
 # decode input location information
-coordinates = geocoder.geocode(location)
+coordinates = utilities.get_location(location, geocoder)
 coordinates_df = pd.DataFrame([[coordinates.latitude, coordinates.longitude]], columns=['LAT', 'LON'])
 
 # get time zone from coordinates

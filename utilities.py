@@ -3,6 +3,15 @@ import pandas as pd
 import pint
 import streamlit as st
 import plotly.graph_objects as go
+from geopy.geocoders import Nominatim
+
+@st.cache_resource(ttl=86400) # 1 day cache
+def generate_geocoder():
+    return Nominatim(user_agent='ASDL-Weather-App')
+
+@st.cache_data(ttl=86400) # 1 day cache
+def get_location(location, _geocoder):
+    return _geocoder.geocode(location)
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
