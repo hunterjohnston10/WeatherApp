@@ -66,7 +66,7 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
                                 start_date,
                                 end_date)
     api_var = unified.VARIABLES['sunrise'].api_var_name
-    sunrise_data = pd.DataFrame.from_dict(data['data'])
+    sunrise_data = pd.DataFrame.from_dict(data['data']['daily'])
     sunrise_data = sunrise_data.rename(columns={api_var: 'sunrise'})
     sunrise_data['date'] = pd.to_datetime(sunrise_data['date']).dt.tz_localize('UTC')
     sunrise_data['sunrise'] = pd.to_datetime(sunrise_data['sunrise']).dt.tz_localize('UTC')
@@ -78,7 +78,7 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
                                 start_date,
                                 end_date)
     api_var = unified.VARIABLES['sunset'].api_var_name
-    sunset_data = pd.DataFrame.from_dict(data['data'])
+    sunset_data = pd.DataFrame.from_dict(data['data']['daily'])
     sunset_data = sunset_data.rename(columns={api_var: 'sunset'})
     sunset_data['date'] = pd.to_datetime(sunset_data['date']).dt.tz_localize('UTC')
     sunset_data['sunset'] = pd.to_datetime(sunset_data['sunset']).dt.tz_localize('UTC')
@@ -222,8 +222,7 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         "us_aqi_nitrogen_dioxide",
         "us_aqi_ozone",
         "us_aqi_sulphur_dioxide",
-        "us_aqi_carbon_monoxide"
-    ]
+        "us_aqi_carbon_monoxide"]
     daily_variables = [
         'uv_index_max',
         'temperature_2m_max',
@@ -249,45 +248,29 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
     daily_data = pd.DataFrame()
     daily_units = {}
 
+    data = unified.fetch_unified(','.join(hourly_variables + daily_variables), 
+                                    location,
+                                    'both',
+                                    start_date,
+                                    end_date)
+    
     for variable in hourly_variables:
-        data = unified.fetch_unified(variable, 
-                                     location,
-                                     'both',
-                                     start_date,
-                                     end_date)
-        
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
         hourly_units[variable] = units
 
-        parsed_data = pd.DataFrame.from_dict(data['data'])
-        parsed_data = parsed_data.rename(columns={api_var: variable})
-        parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
-
-        if hourly_data.empty:
-            hourly_data = parsed_data
-        else:
-            hourly_data = hourly_data.merge(parsed_data, how='outer', on='timestamp_utc')
+    hourly_data = pd.DataFrame.from_dict(data['data']['hourly'])
+    hourly_data = hourly_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in hourly_variables})
+    hourly_data['timestamp_utc'] = pd.to_datetime(hourly_data['timestamp_utc']).dt.tz_localize('UTC')
     
     for variable in daily_variables:
-        data = unified.fetch_unified(variable, 
-                                     location,
-                                     'both',
-                                     start_date,
-                                     end_date)
-        
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
         daily_units[variable] = units
 
-        parsed_data = pd.DataFrame.from_dict(data['data'])
-        parsed_data = parsed_data.rename(columns={api_var: variable})
-        parsed_data['date'] = pd.to_datetime(parsed_data['date']).dt.tz_localize('UTC')
-
-        if daily_data.empty:
-            daily_data = parsed_data
-        else:
-            daily_data = daily_data.merge(parsed_data, how='outer', on='date')
+    daily_data = pd.DataFrame.from_dict(data['data']['daily'])
+    daily_data = daily_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in daily_variables})
+    daily_data['date'] = pd.to_datetime(daily_data['date']).dt.tz_localize('UTC')
     
     return hourly_data, hourly_units, daily_data, daily_units
 

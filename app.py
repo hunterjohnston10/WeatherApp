@@ -133,9 +133,13 @@ with sunset_col:
     utilities.write_centered(utilities.to_12_hr_format(sunset_time), header='p')
 
 # get daily weather data
-daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(
+                                              f"{coordinates.latitude},{coordinates.longitude}",
                                               utilities.to_timestamp(current_date_utc),
                                               utilities.to_timestamp(tomorrow_date_utc))
+# daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+#                                               utilities.to_timestamp(current_date_utc),
+#                                               utilities.to_timestamp(tomorrow_date_utc))
 weather_data_daily = utilities.convert_weather_data(daily_weather_data, 
                                                     daily_weather_units, 
                                                     preferred_units,
@@ -154,9 +158,9 @@ utilities.write_centered(
 utilities.generate_daily_summary(today_daily_weather)
 
 # get hourly weather data
-hourly_weather_data, hourly_weather_units = utilities.get_hourly_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
-                                              utilities.to_timestamp(yesterday_time_utc),
-                                              utilities.to_timestamp(tomorrow_time_utc))
+# hourly_weather_data, hourly_weather_units = utilities.get_hourly_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+#                                               utilities.to_timestamp(yesterday_time_utc),
+#                                               utilities.to_timestamp(tomorrow_time_utc))
 weather_data = utilities.convert_weather_data(hourly_weather_data, 
                                               hourly_weather_units, 
                                               preferred_units,
