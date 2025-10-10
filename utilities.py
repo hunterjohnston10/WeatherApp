@@ -4,6 +4,7 @@ import pint
 import streamlit as st
 import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
+import pint_pandas
 
 @st.cache_resource(ttl=86400) # 1 day cache
 def generate_geocoder():
@@ -38,6 +39,9 @@ def pretty_print_unit(quantity):
     return f"{quantity.units:~#P}"
 
 def convert_weather_data(input_weather_data, weather_units, preferred_units, tz=None):
+    ureg = get_ureg()
+    pint_pandas.PintType.ureg = ureg
+    
     weather_data = input_weather_data.copy()
 
     if tz is not None:
@@ -427,6 +431,7 @@ def generate_current_summary(current_data):
     wind_unit = pretty_print_unit(current_data['wind_speed_10m'])
     visibility_unit = pretty_print_unit(current_data['visibility'])
     pressure_unit = pretty_print_unit(current_data['pressure_msl'])
+    solar_unit = pretty_print_unit(current_data['direct_radiation'])
 
     container = st.container()
     with container:
@@ -520,7 +525,30 @@ def generate_current_summary(current_data):
                     "Cloud Cover",
                     f"{current_data['cloud_cover'].magnitude:.1f} %",
                     width='content'
+                )
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Direct Radiation",
+                    f"{current_data['direct_radiation'].magnitude:.1f} {solar_unit}",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Direct Normal Irradiance",
+                    f"{current_data['direct_normal_irradiance'].magnitude:.1f} {solar_unit}",
+                    width='content'
                 )     
+
+            with c3:
+                st.metric(
+                    "Diffuse Radiation",
+                    f"{current_data['diffuse_radiation'].magnitude:.1f} {solar_unit}",
+                    width='content'
+                )    
 
     return container
 

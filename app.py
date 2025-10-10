@@ -23,8 +23,11 @@ day_delta = pd.Timedelta(1, 'day')
 half_day_delta = pd.Timedelta(12, 'hours')
 one_hour_delta = pd.Timedelta(1, 'hour')
 
+# create tabs
+tab1, tab2 = st.tabs(["Weather Overview", "Time-Series View"])
+
 # select units
-units = st.selectbox('Units Preference',
+units = st.sidebar.selectbox('Units Preference',
                      ('Metric', 'Conventional'))
 
 ureg = utilities.get_ureg()
@@ -49,6 +52,9 @@ if units == 'Metric':
         'snowfall_sum': 'cm',
         'wind_speed_10m_max': 'kph',
         'wind_gusts_10m_max': 'kph',
+        'direct_radiation': 'W/m**2',
+        'direct_normal_irradiance': 'W/m**2',
+        'diffuse_radiation': 'W/m**2'
     }
     temperature_string =  "\N{DEGREE SIGN}C"
 else:
@@ -72,12 +78,15 @@ else:
         'snowfall_sum': 'in',
         'wind_speed_10m_max': 'mph',
         'wind_gusts_10m_max': 'mph',
+        'direct_radiation': 'BTU/(hr*ft**2)',
+        'direct_normal_irradiance': 'BTU/(hr*ft**2)',
+        'diffuse_radiation': 'BTU/(hr*ft**2)'
     }
     temperature_string = "\N{DEGREE SIGN}F"
 pint_pandas.PintType.ureg = ureg
 
 # input location as address, zip code, etc.
-location = st.text_input('Location (Street Address, Zip Code, etc.):', 
+location = st.sidebar.text_input('Location (Street Address, Zip Code, etc.):', 
                          value="275 Ferst Dr NW, Atlanta, GA 30313", 
                          autocomplete="street-address postal-code address-level2", 
                          icon=':material/home:',
@@ -92,7 +101,7 @@ user_timezone = tf.timezone_at(lng=coordinates.longitude, lat=coordinates.latitu
 print(user_timezone)
 
 # plot location on map
-st.map(coordinates_df)
+st.sidebar.map(coordinates_df)
 
 # determine useful times
 current_time_utc = pd.Timestamp.utcnow()
@@ -105,80 +114,110 @@ current_time_local = current_time_utc.tz_convert(tz=user_timezone)
 current_date_local = current_time_local.floor('d')
 tomorrow_date_local = (current_time_local + day_delta).floor('d')
 
-# get sun data
-sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coordinates.longitude}",
-                                              utilities.to_timestamp(current_date_utc),
-                                              utilities.to_timestamp(tomorrow_date_utc))
+with tab1:
+    # get sun data
+    sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coordinates.longitude}",
+                                                utilities.to_timestamp(current_date_utc),
+                                                utilities.to_timestamp(tomorrow_date_utc))
 
-# get sunrise and sunset times for current local time
-sunrise_data = sunrise_sunset_data['sunrise']
-sunrise_time = sunrise_data[(sunrise_data >= current_date_local) 
-                            & (sunrise_data < tomorrow_date_local)].dt.tz_convert(tz=user_timezone).iloc[0]
+    # get sunrise and sunset times for current local time
+    sunrise_data = sunrise_sunset_data['sunrise']
+    sunrise_time = sunrise_data[(sunrise_data >= current_date_local) 
+                                & (sunrise_data < tomorrow_date_local)].dt.tz_convert(tz=user_timezone).iloc[0]
 
-sunset_data = sunrise_sunset_data['sunset']
-sunset_time = sunset_data[(sunset_data >= current_date_local) 
-                          & (sunset_data < tomorrow_date_local)].dt.tz_convert(tz=user_timezone).iloc[0]
+    sunset_data = sunrise_sunset_data['sunset']
+    sunset_time = sunset_data[(sunset_data >= current_date_local) 
+                            & (sunset_data < tomorrow_date_local)].dt.tz_convert(tz=user_timezone).iloc[0]
 
-# Display sunrise and sunset information
-sunrise_col, sunset_col = st.columns(2)
+    # Display sunrise and sunset information
+    sunrise_col, sunset_col = st.columns(2)
 
-with sunrise_col:
-    utilities.write_centered("🌅 Sunrise", header='h1')
-    utilities.write_centered(utilities.to_12_hr_format(sunrise_time), header='p')
+    with sunrise_col:
+        utilities.write_centered("🌅 Sunrise", header='h1')
+        utilities.write_centered(utilities.to_12_hr_format(sunrise_time), header='p')
 
-with sunset_col:
-    utilities.write_centered('🌇 Sunset', header='h1')
-    utilities.write_centered(utilities.to_12_hr_format(sunset_time), header='p')
+    with sunset_col:
+        utilities.write_centered('🌇 Sunset', header='h1')
+        utilities.write_centered(utilities.to_12_hr_format(sunset_time), header='p')
 
-# get daily weather data
-hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(
-                                              f"{coordinates.latitude},{coordinates.longitude}",
-                                              utilities.to_timestamp(current_date_utc),
-                                              utilities.to_timestamp(tomorrow_date_utc))
-# daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
-#                                               utilities.to_timestamp(current_date_utc),
-#                                               utilities.to_timestamp(tomorrow_date_utc))
-weather_data_daily = utilities.convert_weather_data(daily_weather_data, 
-                                                    daily_weather_units, 
-                                                    preferred_units,
-                                                    tz=user_timezone)
+    # get daily weather data
+    hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(
+                                                f"{coordinates.latitude},{coordinates.longitude}",
+                                                utilities.to_timestamp(current_date_utc),
+                                                utilities.to_timestamp(tomorrow_date_utc))
+    # daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
+    #                                               utilities.to_timestamp(current_date_utc),
+    #                                               utilities.to_timestamp(tomorrow_date_utc))
+    weather_data_daily = utilities.convert_weather_data(daily_weather_data, 
+                                                        daily_weather_units, 
+                                                        preferred_units,
+                                                        tz=user_timezone)
 
-# separate weather data between today and tomorrow
-today_daily_weather = weather_data_daily.iloc[0, :]
+    # separate weather data between today and tomorrow
+    today_daily_weather = weather_data_daily.iloc[0, :]
 
-# display weather for today
-utilities.write_centered('Today Overview', header='h1')
-utilities.write_centered(
-    f"Today's forecast is {utilities.translate_weather_code(today_daily_weather['weather_code_daily'].magnitude)}",
-    header='h2')
+    # display weather for today
+    utilities.write_centered('Today Overview', header='h1')
+    utilities.write_centered(
+        f"Today's forecast is {utilities.translate_weather_code(today_daily_weather['weather_code_daily'].magnitude)}",
+        header='h2')
 
 
-utilities.generate_daily_summary(today_daily_weather)
+    utilities.generate_daily_summary(today_daily_weather)
 
-# get hourly weather data
-# hourly_weather_data, hourly_weather_units = utilities.get_hourly_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
-#                                               utilities.to_timestamp(yesterday_time_utc),
-#                                               utilities.to_timestamp(tomorrow_time_utc))
-weather_data = utilities.convert_weather_data(hourly_weather_data, 
-                                              hourly_weather_units, 
-                                              preferred_units,
-                                              tz=user_timezone)
+    # get hourly weather data
+    weather_data = utilities.convert_weather_data(hourly_weather_data, 
+                                                hourly_weather_units, 
+                                                preferred_units,
+                                                tz=user_timezone)
 
-this_hour = current_time_local.floor('h')
-next_hour = current_time_local.ceil('h')
+    this_hour = current_time_local.floor('h')
+    next_hour = current_time_local.ceil('h')
 
-this_hour_data = weather_data[(weather_data['timestamp_utc'] == this_hour)]
+    this_hour_data = weather_data[(weather_data['timestamp_utc'] == this_hour)]
 
-# weird stuff is happening with this slice, so enforce a pandas series
-if len(this_hour_data) > 1:
-    raise RuntimeError("Error in retrieving this hour's data")
-else:
-    this_hour_data = this_hour_data.T.squeeze()
+    # weird stuff is happening with this slice, so enforce a pandas series
+    if len(this_hour_data) > 1:
+        raise RuntimeError("Error in retrieving this hour's data")
+    else:
+        this_hour_data = this_hour_data.T.squeeze()
 
-utilities.write_centered('Right Now Overview', header='h1')
-utilities.write_centered(
-    f"The current conditions are {utilities.translate_weather_code(this_hour_data['weather_code'].magnitude)}",
-    header='h2')
+    utilities.write_centered('Right Now Overview', header='h1')
+    utilities.write_centered(
+        f"The current conditions are {utilities.translate_weather_code(this_hour_data['weather_code'].magnitude)}",
+        header='h2')
 
-utilities.generate_current_summary(this_hour_data)
-st.plotly_chart(utilities.create_aqi_plot(this_hour_data['us_aqi'].magnitude, 'AQI'))
+    utilities.generate_current_summary(this_hour_data)
+
+    # generate air quality information
+    utilities.write_centered('Air Quality', header='h1')
+    st.plotly_chart(utilities.create_aqi_plot(this_hour_data['us_aqi'].magnitude, 'AQI'))
+
+    air_quality_subindices = [
+        ["us_aqi_pm2_5", "PM 2.5"],
+        ["us_aqi_pm10", "PM 10"],
+        ["us_aqi_nitrogen_dioxide", "Nitrogen Dioxide"],
+        ["us_aqi_ozone", "Ozone"],
+        ["us_aqi_sulphur_dioxide", "Sulphur Dioxide"],
+        ["us_aqi_carbon_monoxide", "Carbon Monoxide"]
+    ]
+    aqi_row1 = st.columns(3)
+    aqi_row2 = st.columns(3)
+    for col, (var, natural_name) in zip((aqi_row1 + aqi_row2), air_quality_subindices):
+        tile = col.container(gap=None)
+        tile.plotly_chart(utilities.create_aqi_plot(this_hour_data[var].magnitude, natural_name))
+
+    with st.expander('Detailed Air Quality Data'):
+        air_quality_info = pd.DataFrame([
+            ["PM 2.5", f"{this_hour_data['pm2_5'].magnitude} {utilities.pretty_print_unit(this_hour_data['pm2_5'])}"],
+            ["PM 10", f"{this_hour_data['pm10'].magnitude} {utilities.pretty_print_unit(this_hour_data['pm10'])}"],
+            ["Nitrogen Dioxide", f"{this_hour_data['nitrogen_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['nitrogen_dioxide'])}"],
+            ["Carbon Monoxide", f"{this_hour_data['carbon_monoxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['carbon_monoxide'])}"],
+            ["Ozone", f"{this_hour_data['ozone'].magnitude} {utilities.pretty_print_unit(this_hour_data['ozone'])}"],
+            ["Sulphur Dioxide", f"{this_hour_data['sulphur_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['sulphur_dioxide'])}"],
+            ["Carbon Dioxide", f"{this_hour_data['carbon_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['carbon_dioxide'])}"],
+        ])
+        st.dataframe(air_quality_info)
+
+with tab2:
+    st.write('WIP')
