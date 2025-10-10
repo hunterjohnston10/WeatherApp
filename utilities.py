@@ -13,6 +13,12 @@ def generate_geocoder():
 def get_location(location, _geocoder):
     return _geocoder.geocode(location)
 
+@st.cache_resource(ttl=900) # 15 minute cache
+def get_ureg():
+    ureg = pint.UnitRegistry()
+    ureg.load_definitions('weather_units.txt')
+    return ureg
+
 def to_timestamp(datetime_object):
     return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
 

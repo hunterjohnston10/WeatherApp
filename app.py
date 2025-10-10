@@ -27,8 +27,7 @@ one_hour_delta = pd.Timedelta(1, 'hour')
 units = st.selectbox('Units Preference',
                      ('Metric', 'Conventional'))
 
-ureg = pint.UnitRegistry(autoconvert_to_preferred=True)
-ureg.load_definitions('weather_units.txt')
+ureg = utilities.get_ureg()
 if units == 'Metric':
     preferred_units = {
         'temperature_2m': 'degC',
@@ -75,7 +74,6 @@ else:
         'wind_gusts_10m_max': 'mph',
     }
     temperature_string = "\N{DEGREE SIGN}F"
-ureg.default_preferred_units = preferred_units
 pint_pandas.PintType.ureg = ureg
 
 # input location as address, zip code, etc.
