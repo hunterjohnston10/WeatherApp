@@ -6,9 +6,12 @@ certifi==2025.8.3
 cffi==2.0.0
 charset-normalizer==3.4.3
 click==8.3.0
+decorator==5.2.1
 flatbuffers==25.9.23
 flexcache==0.3
 flexparser==0.4
+future==1.0.0
+geocoder==1.38.1
 geographiclib==2.1
 geopy==2.4.1
 gitdb==4.0.12
@@ -34,6 +37,7 @@ pycparser==2.23
 pydeck==0.9.1
 python-dateutil==2.9.0.post0
 pytz==2025.2
+ratelim==0.1.6
 referencing==0.36.2
 requests==2.32.5
 rpds-py==0.27.1

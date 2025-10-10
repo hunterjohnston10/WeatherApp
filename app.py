@@ -17,7 +17,7 @@ tf = TimezoneFinder()
 # set plotly as graphing backend
 pd.options.plotting.backend = 'plotly'
 
-# create Nominatim geocoder
+# create geocoder
 geocoder = utilities.generate_geocoder()
 
 # create useful time deltas
