@@ -94,6 +94,11 @@ def write_right(content, header='span'):
 def pretty_print_unit(quantity):
     return f"{quantity.units:~#P}"
 
+def degree_to_compass(num):
+    val=int((num/22.5)+.5)
+    arr=["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
+    return arr[(val % 16)]
+
 def convert_weather_data(input_weather_data, weather_units, preferred_units, tz=None):
     ureg = get_ureg()
     pint_pandas.PintType.ureg = ureg
@@ -373,7 +378,7 @@ def generate_daily_summary(day_data):
             with c3:
                 st.metric(
                     "Dominant Wind Direction",
-                    f"{day_data['wind_direction_10m_dominant'].magnitude:.1f}\N{DEGREE SIGN}",
+                    f"{degree_to_compass(day_data['wind_direction_10m_dominant'].magnitude)}",
                     width='content'
                 )   
 
@@ -455,7 +460,7 @@ def generate_current_summary(current_data):
             with c3:
                 st.metric(
                     "Wind Direction",
-                    f"{current_data['wind_direction_10m'].magnitude:.1f}\N{DEGREE SIGN}",
+                    f"{degree_to_compass(current_data['wind_direction_10m'].magnitude)}",
                     width='content'
                 ) 
 
