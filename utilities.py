@@ -6,6 +6,59 @@ import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
 import pint_pandas
 
+# define useful constants
+hourly_variables = [
+    "temperature_2m",
+    "apparent_temperature",
+    "relative_humidity_2m",
+    "precipitation",
+    "precipitation_probability",
+    "snowfall",
+    "pressure_msl",
+    "wind_speed_10m",
+    "wind_gusts_10m",
+    "wind_direction_10m",
+    "visibility",
+    "cloud_cover",
+    "evapotranspiration",
+    "weather_code",
+    "pm2_5",
+    "pm10",
+    "nitrogen_dioxide",
+    "carbon_monoxide",
+    "ozone",
+    "sulphur_dioxide",
+    "carbon_dioxide",
+    "us_aqi",
+    "us_aqi_pm2_5",
+    "us_aqi_pm10",
+    "us_aqi_nitrogen_dioxide",
+    "us_aqi_ozone",
+    "us_aqi_sulphur_dioxide",
+    "us_aqi_carbon_monoxide",
+    "direct_radiation",
+    "direct_normal_irradiance",
+    "diffuse_radiation"]
+daily_variables = [
+    'uv_index_max',
+    'temperature_2m_max',
+    'temperature_2m_min',
+    'apparent_temperature_max',
+    'apparent_temperature_min',
+    'precipitation_sum',
+    'rain_sum',
+    'showers_sum',
+    'snowfall_sum',
+    'precipitation_hours',
+    'precipitation_probability_max',
+    'precipitation_probability_mean',
+    'precipitation_probability_min',
+    'weather_code_daily',
+    'wind_speed_10m_max',
+    'wind_gusts_10m_max',
+    'wind_direction_10m_dominant'
+    ]
+
 @st.cache_resource(ttl=86400) # 1 day cache
 def generate_geocoder():
     return Nominatim(user_agent='ASDL-Weather-App')
@@ -98,27 +151,7 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
     return all_data
 
 @st.cache_data(ttl=900) # 15 minute cache
-def get_daily_weather_data(location, start_date, end_date):
-    daily_variables = [
-        'uv_index_max',
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'apparent_temperature_max',
-        'apparent_temperature_min',
-        'precipitation_sum',
-        'rain_sum',
-        'showers_sum',
-        'snowfall_sum',
-        'precipitation_hours',
-        'precipitation_probability_max',
-        'precipitation_probability_mean',
-        'precipitation_probability_min',
-        'weather_code_daily',
-        'wind_speed_10m_max',
-        'wind_gusts_10m_max',
-        'wind_direction_10m_dominant'
-        ]
-    
+def get_daily_weather_data(location, start_date, end_date):    
     daily_data = pd.DataFrame()
     daily_units = {}
     
@@ -146,37 +179,6 @@ def get_daily_weather_data(location, start_date, end_date):
     
 @st.cache_data(ttl=900)  # 15 minute cache
 def get_hourly_weather_data(location, start_date, end_date):
-    hourly_variables = [
-        "temperature_2m",
-        "apparent_temperature",
-        "relative_humidity_2m",
-        "precipitation",
-        "precipitation_probability",
-        "snowfall",
-        "pressure_msl",
-        "wind_speed_10m",
-        "wind_gusts_10m",
-        "wind_direction_10m",
-        "visibility",
-        "cloud_cover",
-        "evapotranspiration",
-        "weather_code",
-        "pm2_5",
-        "pm10",
-        "nitrogen_dioxide",
-        "carbon_monoxide",
-        "ozone",
-        "sulphur_dioxide",
-        "carbon_dioxide",
-        "us_aqi",
-        "us_aqi_pm2_5",
-        "us_aqi_pm10",
-        "us_aqi_nitrogen_dioxide",
-        "us_aqi_ozone",
-        "us_aqi_sulphur_dioxide",
-        "us_aqi_carbon_monoxide"
-    ]
-
     hourly_data = pd.DataFrame()
     hourly_units = {}
 
@@ -204,57 +206,7 @@ def get_hourly_weather_data(location, start_date, end_date):
 
 @st.cache_data(ttl=900)  # 15 minute cache
 def get_all_weather_data(location: str, start_date: str, end_date: str):
-    hourly_variables = [
-        "temperature_2m",
-        "apparent_temperature",
-        "relative_humidity_2m",
-        "precipitation",
-        "precipitation_probability",
-        "snowfall",
-        "pressure_msl",
-        "wind_speed_10m",
-        "wind_gusts_10m",
-        "wind_direction_10m",
-        "visibility",
-        "cloud_cover",
-        "evapotranspiration",
-        "weather_code",
-        "pm2_5",
-        "pm10",
-        "nitrogen_dioxide",
-        "carbon_monoxide",
-        "ozone",
-        "sulphur_dioxide",
-        "carbon_dioxide",
-        "us_aqi",
-        "us_aqi_pm2_5",
-        "us_aqi_pm10",
-        "us_aqi_nitrogen_dioxide",
-        "us_aqi_ozone",
-        "us_aqi_sulphur_dioxide",
-        "us_aqi_carbon_monoxide",
-        "direct_radiation",
-        "direct_normal_irradiance",
-        "diffuse_radiation"]
-    daily_variables = [
-        'uv_index_max',
-        'temperature_2m_max',
-        'temperature_2m_min',
-        'apparent_temperature_max',
-        'apparent_temperature_min',
-        'precipitation_sum',
-        'rain_sum',
-        'showers_sum',
-        'snowfall_sum',
-        'precipitation_hours',
-        'precipitation_probability_max',
-        'precipitation_probability_mean',
-        'precipitation_probability_min',
-        'weather_code_daily',
-        'wind_speed_10m_max',
-        'wind_gusts_10m_max',
-        'wind_direction_10m_dominant'
-        ]
+    
 
     hourly_data = pd.DataFrame()
     hourly_units = {}
