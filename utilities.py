@@ -228,7 +228,10 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
         "us_aqi_nitrogen_dioxide",
         "us_aqi_ozone",
         "us_aqi_sulphur_dioxide",
-        "us_aqi_carbon_monoxide"]
+        "us_aqi_carbon_monoxide",
+        "direct_radiation",
+        "direct_normal_irradiance",
+        "diffuse_radiation"]
     daily_variables = [
         'uv_index_max',
         'temperature_2m_max',
