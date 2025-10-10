@@ -5,6 +5,8 @@ import streamlit as st
 import plotly.graph_objects as go
 from geopy.geocoders import Nominatim
 import pint_pandas
+import geocoder
+from types import SimpleNamespace
 
 # define useful constants
 hourly_variables = [
@@ -61,11 +63,12 @@ daily_variables = [
 
 @st.cache_resource(ttl=86400) # 1 day cache
 def generate_geocoder():
-    return Nominatim(user_agent='ASDL-Weather-App')
+    return geocoder.arcgis
 
 @st.cache_data(ttl=86400) # 1 day cache
 def get_location(location, _geocoder):
-    return _geocoder.geocode(location)
+    latlng = _geocoder(location).latlng
+    return SimpleNamespace(latitude=latlng[0], longitude=latlng[1])
 
 @st.cache_resource(ttl=900) # 15 minute cache
 def get_ureg():
