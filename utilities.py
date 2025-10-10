@@ -77,7 +77,7 @@ def get_ureg():
     return ureg
 
 def to_timestamp(datetime_object):
-    return f"{datetime_object.year}-{datetime_object.month}-{datetime_object.day}"
+    return f"{datetime_object.year:04d}-{datetime_object.month:02d}-{datetime_object.day:02d}"
 
 def to_12_hr_format(datetime_object):
     return datetime_object.strftime("%I:%M:%S %p")

@@ -335,6 +335,13 @@ with tab2:
 
 with tab3:
     with st.form('download_form'):
+        begin_date = st.date_input('Begin Date',
+                                   value=utilities.to_timestamp(past_limit_utc),
+                                   max_value=utilities.to_timestamp(future_limit_utc))
+        end_date = st.date_input('End Date',
+                                 value=utilities.to_timestamp(future_limit_utc),
+                                 max_value=utilities.to_timestamp(future_limit_utc))
+
         st.write('Hourly Data')
         hourly_checkboxes = [st.checkbox(i) for i in utilities.hourly_variables]
 
@@ -360,8 +367,8 @@ with tab3:
         data = unified.fetch_unified(variables, 
                                      location_str,
                                      'both',
-                                     utilities.to_timestamp(past_limit_utc),
-                                     utilities.to_timestamp(future_limit_utc))
+                                     utilities.to_timestamp(begin_date),
+                                     utilities.to_timestamp(end_date))
         
         st.download_button('Download Data', data=json.dumps(data, indent=4))
 
