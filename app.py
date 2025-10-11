@@ -109,6 +109,7 @@ st.sidebar.map(coordinates_df)
 current_time_utc = pd.Timestamp.utcnow()
 current_date_utc = current_time_utc.floor('d')
 tomorrow_date_utc = (current_time_utc + day_delta).floor('d')
+yesterday_date_utc = (current_date_utc - day_delta)
 tomorrow_time_utc = current_time_utc + day_delta
 yesterday_time_utc = current_time_utc - day_delta
 past_limit_utc = current_date_utc - 2 * day_delta
@@ -123,9 +124,11 @@ future_limit_local = current_date_local + 4 * day_delta
 with tab1:
     # get sun data
     sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coordinates.longitude}",
-                                                utilities.to_timestamp(current_date_utc),
+                                                utilities.to_timestamp(yesterday_date_utc),
                                                 utilities.to_timestamp(tomorrow_date_utc))
 
+    print(sunrise_sunset_data)
+    
     # get sunrise and sunset times for current local time
     sunrise_data = sunrise_sunset_data['sunrise']
     sunrise_time = sunrise_data[(sunrise_data >= current_date_local) 
