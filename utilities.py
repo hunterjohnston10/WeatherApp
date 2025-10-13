@@ -537,3 +537,22 @@ def create_aqi_plot(aqi_data, title):
     fig.update_layout(font = {'color': "black", 'family': "Arial"})
 
     return fig
+
+def create_forecast_plot(hourly_data, weather_keys, weather_names, unit_name, title, current_time, future_time_limit):
+    plot = go.Figure()
+    for k, n in zip(weather_keys, weather_names):
+        plot.add_trace(go.Scatter(x=hourly_data['timestamp_utc'],
+                                 y=hourly_data[k].pint.magnitude,
+                                 name=n,
+                                 showlegend=True))
+        
+    plot.add_vrect(
+        x0=current_time.floor('h'),
+        x1=future_time_limit,
+        fillcolor='gray',
+        opacity=0.3,
+        line_width=0
+    )
+
+    plot.update_layout(yaxis_title=unit_name, title=title)
+    return plot

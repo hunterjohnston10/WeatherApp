@@ -112,14 +112,14 @@ tomorrow_date_utc = (current_time_utc + day_delta).floor('d')
 yesterday_date_utc = (current_date_utc - day_delta)
 tomorrow_time_utc = current_time_utc + day_delta
 yesterday_time_utc = current_time_utc - day_delta
-past_limit_utc = current_date_utc - 2 * day_delta
+past_limit_utc = current_date_utc - 8 * day_delta
 future_limit_utc = current_date_utc + 5 * day_delta
 
 current_time_local = current_time_utc.tz_convert(tz=user_timezone)
 current_date_local = current_time_local.floor('d')
 tomorrow_date_local = (current_time_local + day_delta).floor('d')
-past_limit_local = current_date_local - 1 * day_delta
-future_limit_local = current_date_local + 4 * day_delta
+past_limit_local = current_date_local - 7 * day_delta
+future_limit_local = current_date_local + 3 * day_delta
 
 with tab1:
     # get sun data
@@ -152,7 +152,7 @@ with tab1:
     # get daily weather data
     hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(
                                                 f"{coordinates.latitude},{coordinates.longitude}",
-                                                utilities.to_timestamp(current_date_utc),
+                                                utilities.to_timestamp(yesterday_date_utc),
                                                 utilities.to_timestamp(tomorrow_date_utc))
     # daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
     #                                               utilities.to_timestamp(current_date_utc),
@@ -163,7 +163,8 @@ with tab1:
                                                         tz=user_timezone)
 
     # separate weather data between today and tomorrow
-    today_daily_weather = weather_data_daily.iloc[0, :]
+    today_daily_weather = weather_data_daily[(weather_data_daily['date'] >= current_date_local) 
+                            & (weather_data_daily['date'] < tomorrow_date_local)].iloc[0]
 
     # display weather for today
     utilities.write_centered('Today Overview', header='h1')
@@ -244,96 +245,99 @@ with tab2:
                                                 (hourly_weather_data['timestamp_utc'] <= future_limit_local)]
     
     # create temperature plot
-    temperature_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                            y=filtered_weather_data['temperature_2m'].pint.magnitude, 
-                                            name='Temperature'))
-    temperature_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['apparent_temperature'].pint.magnitude, 
-                                          name='Apparent Temperature'))
-    temperature_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['temperature_2m'].pint),
-                                   title='Temperature')
+    temperature_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['temperature_2m', 'apparent_temperature'],
+        weather_names=['Temperature', 'Apparent Temperature'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['temperature_2m'])),
+        title='Temperature',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(temperature_plot)
 
     # create rain plot
-    rain_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                         y=filtered_weather_data['precipitation'].pint.magnitude, 
-                                         name='Precipitation',
-                                         showlegend=True))
-    rain_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['precipitation'].pint),
-                            title='Precipitation')
+    rain_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['precipitation'],
+        weather_names=['Precipitation'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['precipitation'])),
+        title='Precipitation',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(rain_plot)
 
     # create snow plot
-    rain_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                         y=filtered_weather_data['snowfall'].pint.magnitude, 
-                                         name='Snowfall',
-                                         showlegend=True))
-    rain_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['snowfall'].pint),
-                            title='Snowfall')
-    st.plotly_chart(rain_plot)
+    snow_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['snowfall'],
+        weather_names=['Snowfall'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['snowfall'])),
+        title='Snowfall',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
+    st.plotly_chart(snow_plot)
 
     # create humidity plot
-    humidity_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                         y=filtered_weather_data['relative_humidity_2m'].pint.magnitude, 
-                                         name='Relative Humidity',
-                                         showlegend=True))
-    humidity_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['relative_humidity_2m'].pint),
-                                title='Relative Humidity')
+    humidity_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['relative_humidity_2m'],
+        weather_names=['Relative Humidity'],
+        unit_name='%',
+        title='Relative Humidity',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(humidity_plot)
 
     # create pressure plot
-    pressure_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                         y=filtered_weather_data['pressure_msl'].pint.magnitude, 
-                                         name='Pressure',
-                                         showlegend=True))
-    pressure_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['pressure_msl'].pint),
-                                title='Pressure')
+    pressure_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['pressure_msl'],
+        weather_names=['Pressure'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['pressure_msl'])),
+        title='Pressure',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(pressure_plot)
 
     # create uv plot
-    uv_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                            y=filtered_weather_data['direct_radiation'].pint.magnitude, 
-                                            name='Direct Radiation'))
-    uv_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['direct_normal_irradiance'].pint.magnitude, 
-                                          name='Direct Normal Irradiance'))
-    uv_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['diffuse_radiation'].pint.magnitude, 
-                                          name='Diffuse Radiation'))
-    uv_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['direct_radiation'].pint),
-                          title='Solar Radiation')
+    uv_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['direct_radiation', 'direct_normal_irradiance', 'diffuse_radiation'],
+        weather_names=['Direct Radiation', 'Direct Normal Irradiance', 'Diffuse Radiation'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['direct_radiation'])),
+        title='Solar Radiation',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(uv_plot)
 
     # create air quality plot
-    air_quality_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                            y=filtered_weather_data['pm2_5'].pint.magnitude, 
-                                            name='PM 2.5'))
-    air_quality_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['pm10'].pint.magnitude, 
-                                          name='PM10'))
-    air_quality_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['nitrogen_dioxide'].pint.magnitude, 
-                                          name='Nitrogen Dioxide'))
-    air_quality_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['carbon_monoxide'].pint.magnitude, 
-                                          name='Carbon Monoxide'))
-    air_quality_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['ozone'].pint.magnitude, 
-                                          name='Ozone'))
-    air_quality_plot.add_trace(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                          y=filtered_weather_data['sulphur_dioxide'].pint.magnitude, 
-                                          name='Sulphur Dioxide'))
-    air_quality_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['pm2_5'].pint),
-                                   title='Air Quality')
+    air_quality_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['pm2_5', 'pm10', 'nitrogen_dioxide', 'carbon_monoxide', 'ozone', 'sulphur_dioxide'],
+        weather_names=['PM 2.5', 'PM 10', 'Nitrogen Dioxide', 'Carbon Monoxide', 'Ozone', 'Sulphur Dioxide'],
+        unit_name=utilities.pretty_print_unit(filtered_weather_data['pm2_5'].pint),
+        title='Air Quality',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(air_quality_plot)
 
     # create carbon dioxide plot
-    co2_plot = go.Figure(go.Scatter(x=filtered_weather_data['timestamp_utc'], 
-                                         y=filtered_weather_data['carbon_dioxide'].pint.magnitude, 
-                                         name='Carbon Dioxide',
-                                         showlegend=True))
-    co2_plot.update_layout(yaxis_title=utilities.pretty_print_unit(filtered_weather_data['carbon_dioxide'].pint),
-                                title='Carbon Dioxide')
+    co2_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['carbon_dioxide'],
+        weather_names=['Carbon Dioxide'],
+        unit_name=utilities.pretty_print_unit(filtered_weather_data['carbon_dioxide'].pint),
+        title='Carbon Dioxide',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
     st.plotly_chart(co2_plot)
 
 with tab3:
