@@ -10,6 +10,9 @@ import pint_pandas
 from timezonefinder import TimezoneFinder
 import unified
 import json
+import tempfile
+import csv
+import itertools
 
 # set up tzwhere
 tf = TimezoneFinder()
@@ -345,12 +348,19 @@ with tab3:
         end_date = st.date_input('End Date',
                                  value=utilities.to_timestamp(future_limit_utc),
                                  max_value=utilities.to_timestamp(future_limit_utc))
+        
+        format_radio = st.radio('Format',
+                                options=['JSON', 'CSV', 'Parquet'],
+                                horizontal=True,
+                                width='stretch')
 
         st.write('Hourly Data')
-        hourly_checkboxes = [st.checkbox(i) for i in utilities.hourly_variables]
+        hourly_cols = itertools.cycle(st.columns(3))
+        hourly_checkboxes = [next(hourly_cols).checkbox(i) for i in utilities.hourly_variables]
 
         st.write('Daily Data')
-        daily_checkboxes = [st.checkbox(i) for i in utilities.daily_variables]
+        daily_cols = itertools.cycle(st.columns(3))
+        daily_checkboxes = [next(daily_cols).checkbox(i) for i in utilities.daily_variables]
 
         submitted = st.form_submit_button("Fetch Data")
 
@@ -373,6 +383,70 @@ with tab3:
                                      'both',
                                      utilities.to_timestamp(begin_date),
                                      utilities.to_timestamp(end_date))
+        hourly_data = data['data']['hourly']
+        daily_data = data['data']['daily']
+        units = data['units']
+
+        # create hourly and daily pandas files
+        try:
+            hourly_keys = list(hourly_data[0].keys())
+            hourly_units = {x: units['time'] if x=='timestamp_utc' else units[x] for x in hourly_keys}
+            header_units = [x + '_units' for x in hourly_keys]
+            header_row = list(itertools.chain(*zip(hourly_keys, header_units)))
+
+            hd_pd = []
+            for hd in hourly_data:
+                ld = []
+                for k in hourly_keys:
+                    ld.append(hd[k])
+                    ld.append(hourly_units[k])
+                hd_pd.append(ld)
+            hd_pd = pd.DataFrame(hd_pd, columns=header_row)
+        except IndexError:
+            hd_pd = pd.DataFrame()
+
+        try:
+            daily_keys = list(daily_data[0].keys())
+            daily_units = {x: units['time'] if x=='date' else units[x] for x in daily_keys}
+            header_units = [x + '_units' for x in daily_keys]
+            header_row = list(itertools.chain(*zip(daily_keys, header_units)))
+
+            dd_pd = []
+            for hd in daily_data:
+                ld = []
+                for k in daily_keys:
+                    ld.append(hd[k])
+                    ld.append(daily_units[k])
+                dd_pd.append(ld)
+            dd_pd = pd.DataFrame(dd_pd, columns=header_row)
+        except IndexError:
+            dd_pd = pd.DataFrame()
         
-        st.download_button('Download Data', data=json.dumps(data, indent=4))
+        if format_radio == 'JSON':
+            download_data = json.dumps(data, indent=4)
+            download_fname = 'weather_data_download.json'
+        
+            st.download_button('Download Data', data=download_data, file_name=download_fname, on_click='ignore')
+        elif format_radio == 'CSV':
+            # generate houly data file
+            st.download_button('Download Hourly Data', 
+                               data=hd_pd.to_csv().encode('utf-8'), 
+                               file_name='hourly_weather_data_download.csv', 
+                               on_click='ignore')
+            # generate daily data file
+            st.download_button('Download Daily Data', 
+                               data=dd_pd.to_csv().encode('utf-8'), 
+                               file_name='daily_weather_data_download.csv', 
+                               on_click='ignore')
+        elif format_radio == 'Parquet':
+            # generate houly data file
+            st.download_button('Download Hourly Data', 
+                               data=hd_pd.to_parquet(), 
+                               file_name='hourly_weather_data_download.parquet', 
+                               on_click='ignore')
+            # generate daily data file
+            st.download_button('Download Daily Data', 
+                               data=dd_pd.to_parquet(), 
+                               file_name='daily_weather_data_download.parquet', 
+                               on_click='ignore')
 
