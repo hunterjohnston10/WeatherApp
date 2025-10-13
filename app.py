@@ -100,7 +100,6 @@ coordinates_df = pd.DataFrame([[coordinates.latitude, coordinates.longitude]], c
 
 # get time zone from coordinates
 user_timezone = tf.timezone_at(lng=coordinates.longitude, lat=coordinates.latitude)
-print(user_timezone)
 
 # plot location on map
 st.sidebar.map(coordinates_df)
@@ -126,8 +125,6 @@ with tab1:
     sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coordinates.longitude}",
                                                 utilities.to_timestamp(yesterday_date_utc),
                                                 utilities.to_timestamp(tomorrow_date_utc))
-
-    print(sunrise_sunset_data)
     
     # get sunrise and sunset times for current local time
     sunrise_data = sunrise_sunset_data['sunrise']
