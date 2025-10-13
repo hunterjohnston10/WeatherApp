@@ -184,7 +184,8 @@ with tab1:
     this_hour = current_time_local.floor('h')
     next_hour = current_time_local.ceil('h')
 
-    this_hour_data = weather_data[(weather_data['timestamp_utc'] == this_hour)]
+    this_hour_data = weather_data[(weather_data['timestamp_utc'] >= this_hour) & 
+                                  (weather_data['timestamp_utc'] < next_hour)]
 
     # weird stuff is happening with this slice, so enforce a pandas series
     if len(this_hour_data) > 1:
