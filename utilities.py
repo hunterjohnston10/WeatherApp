@@ -70,6 +70,11 @@ def get_location(location, _geocoder):
     latlng = _geocoder(location).latlng
     return SimpleNamespace(latitude=latlng[0], longitude=latlng[1])
 
+@st.cache_data(ttl=86400)
+def get_ip_location(ip_addr):
+    location = geocoder.ip(ip_addr)
+    return ', '.join([location.city, location.state, location.country])
+
 @st.cache_resource(ttl=900) # 15 minute cache
 def get_ureg():
     ureg = pint.UnitRegistry()

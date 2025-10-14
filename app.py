@@ -91,8 +91,12 @@ else:
 pint_pandas.PintType.ureg = ureg
 
 # input location as address, zip code, etc.
+try:
+    default_location = utilities.get_ip_location(st.context.ip_address)
+except:
+    default_location = "275 Ferst Dr NW, Atlanta, GA 30313"
 location = st.sidebar.text_input('Location (Street Address, Zip Code, etc.):', 
-                         value="275 Ferst Dr NW, Atlanta, GA 30313", 
+                         value=default_location, 
                          autocomplete="street-address postal-code address-level2", 
                          icon=':material/home:',
                          label_visibility='hidden')
