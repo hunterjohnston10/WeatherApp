@@ -1,17 +1,10 @@
-from zoneinfo import ZoneInfo
 import streamlit as st
-import streamlit.components.v1 as components
-from streamlit_javascript import st_javascript
 import pandas as pd
 import utilities
-import plotly.graph_objects as go
-import pint
 import pint_pandas
 from timezonefinder import TimezoneFinder
 import unified
 import json
-import tempfile
-import csv
 import itertools
 
 # set up tzwhere
