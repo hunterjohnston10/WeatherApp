@@ -56,6 +56,12 @@ daily_variables = [
     'wind_gusts_10m_max',
     'wind_direction_10m_dominant'
     ]
+def get_ureg():
+    ureg = pint.UnitRegistry()
+    ureg.load_definitions('weather_units.txt')
+    return ureg
+ureg = get_ureg()
+pint_pandas.PintType.ureg = ureg
 
 @st.cache_resource(ttl=86400) # 1 day cache
 def generate_geocoder():
@@ -70,12 +76,6 @@ def get_location(location, _geocoder):
 def get_ip_location(ip_addr):
     location = geocoder.ip(ip_addr)
     return ', '.join([location.city, location.state, location.country])
-
-@st.cache_resource(ttl=900) # 15 minute cache
-def get_ureg():
-    ureg = pint.UnitRegistry()
-    ureg.load_definitions('weather_units.txt')
-    return ureg
 
 def to_timestamp(datetime_object):
     return f"{datetime_object.year:04d}-{datetime_object.month:02d}-{datetime_object.day:02d}"
@@ -100,10 +100,7 @@ def degree_to_compass(num):
     arr=["N","NNE","NE","ENE","E","ESE", "SE", "SSE","S","SSW","SW","WSW","W","WNW","NW","NNW"]
     return arr[(val % 16)]
 
-def convert_weather_data(input_weather_data, weather_units, preferred_units, tz=None):
-    ureg = get_ureg()
-    pint_pandas.PintType.ureg = ureg
-    
+def convert_weather_data(input_weather_data, weather_units, preferred_units, tz=None):    
     weather_data = input_weather_data.copy()
 
     if tz is not None:
@@ -213,7 +210,6 @@ def get_hourly_weather_data(location, start_date, end_date):
 
     return hourly_data, hourly_units
 
-@st.cache_data(ttl=900)  # 15 minute cache
 def get_all_weather_data(location: str, start_date: str, end_date: str):
     
 

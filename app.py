@@ -1,6 +1,7 @@
 import streamlit as st
-import pandas as pd
+from streamlit import session_state as ss
 import utilities
+import pandas as pd
 import pint_pandas
 from timezonefinder import TimezoneFinder
 import unified
@@ -28,7 +29,7 @@ tab1, tab2, tab3 = st.tabs(["Weather Overview", "Time-Series View", "Data Downlo
 units = st.sidebar.selectbox('Units Preference',
                      ('Metric', 'Conventional'))
 
-ureg = utilities.get_ureg()
+ureg = utilities.ureg
 if units == 'Metric':
     preferred_units = {
         'temperature_2m': 'degC',
@@ -353,8 +354,10 @@ with tab3:
                                 width='stretch')
 
         st.write('Hourly Data')
+        selector_container = st.container()
         hourly_cols = itertools.cycle(st.columns(3))
         hourly_checkboxes = [next(hourly_cols).checkbox(i) for i in utilities.hourly_variables]
+
 
         st.write('Daily Data')
         daily_cols = itertools.cycle(st.columns(3))
