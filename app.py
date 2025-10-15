@@ -147,14 +147,13 @@ with tab1:
         utilities.write_centered('🌇 Sunset', header='h1')
         utilities.write_centered(utilities.to_12_hr_format(sunset_time), header='p')
 
-    # get daily weather data
+    # get all weather data
     hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(
                                                 f"{coordinates.latitude},{coordinates.longitude}",
                                                 utilities.to_timestamp(yesterday_date_utc),
                                                 utilities.to_timestamp(tomorrow_date_utc))
-    # daily_weather_data, daily_weather_units = utilities.get_daily_weather_data(f"{coordinates.latitude},{coordinates.longitude}",
-    #                                               utilities.to_timestamp(current_date_utc),
-    #                                               utilities.to_timestamp(tomorrow_date_utc))
+
+    # get daily weather data
     weather_data_daily = utilities.convert_weather_data(daily_weather_data, 
                                                         daily_weather_units, 
                                                         preferred_units,

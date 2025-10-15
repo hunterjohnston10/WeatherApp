@@ -156,63 +156,49 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
 
     return all_data
 
-@st.cache_data(ttl=900) # 15 minute cache
 def get_daily_weather_data(location, start_date, end_date):    
     daily_data = pd.DataFrame()
     daily_units = {}
+
+    data = unified.fetch_unified(','.join(daily_variables), 
+                                    location,
+                                    'both',
+                                    start_date,
+                                    end_date)
     
     for variable in daily_variables:
-        data = unified.fetch_unified(variable, 
-                                     location,
-                                     'both',
-                                     start_date,
-                                     end_date)
-        
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
         daily_units[variable] = units
 
-        parsed_data = pd.DataFrame.from_dict(data['data'])
-        parsed_data = parsed_data.rename(columns={api_var: variable})
-        parsed_data['date'] = pd.to_datetime(parsed_data['date']).dt.tz_localize('UTC')
-
-        if daily_data.empty:
-            daily_data = parsed_data
-        else:
-            daily_data = daily_data.merge(parsed_data, how='outer', on='date')
-
+    daily_data = pd.DataFrame.from_dict(data['data']['daily'])
+    daily_data = daily_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in daily_variables})
+    daily_data['date'] = pd.to_datetime(daily_data['date']).dt.tz_localize('UTC')
+    
     return daily_data, daily_units
     
-@st.cache_data(ttl=900)  # 15 minute cache
 def get_hourly_weather_data(location, start_date, end_date):
     hourly_data = pd.DataFrame()
     hourly_units = {}
 
+    data = unified.fetch_unified(','.join(hourly_variables), 
+                                    location,
+                                    'both',
+                                    start_date,
+                                    end_date)
+    
     for variable in hourly_variables:
-        data = unified.fetch_unified(variable, 
-                                     location,
-                                     'both',
-                                     start_date,
-                                     end_date)
-        
         api_var = unified.VARIABLES[variable].api_var_name
         units = data['units'][api_var].strip().replace(' ', '_')
         hourly_units[variable] = units
 
-        parsed_data = pd.DataFrame.from_dict(data['data'])
-        parsed_data = parsed_data.rename(columns={api_var: variable})
-        parsed_data['timestamp_utc'] = pd.to_datetime(parsed_data['timestamp_utc']).dt.tz_localize('UTC')
-
-        if hourly_data.empty:
-            hourly_data = parsed_data
-        else:
-            hourly_data = hourly_data.merge(parsed_data, how='outer', on='timestamp_utc')
+    hourly_data = pd.DataFrame.from_dict(data['data']['hourly'])
+    hourly_data = hourly_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in hourly_variables})
+    hourly_data['timestamp_utc'] = pd.to_datetime(hourly_data['timestamp_utc']).dt.tz_localize('UTC')
 
     return hourly_data, hourly_units
 
 def get_all_weather_data(location: str, start_date: str, end_date: str):
-    
-
     hourly_data = pd.DataFrame()
     hourly_units = {}
     daily_data = pd.DataFrame()
