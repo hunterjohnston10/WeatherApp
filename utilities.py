@@ -538,8 +538,6 @@ def create_aqi_plot(aqi_data, title):
                 {'range': [300, 500], 'color': 'brown'},],
             }))
 
-    fig.update_layout(font = {'color': "black", 'family': "Arial"})
-
     return fig
 
 def create_forecast_plot(hourly_data, weather_keys, weather_names, unit_name, title, current_time, future_time_limit):
