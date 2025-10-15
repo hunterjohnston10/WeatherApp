@@ -8,6 +8,11 @@ import unified
 import json
 import itertools
 
+# define session state for checkboxes
+for v in utilities.hourly_variables + utilities.daily_variables:
+    if v not in ss:
+        ss[v] = False
+
 # set up tzwhere
 tf = TimezoneFinder()
 
@@ -339,6 +344,23 @@ with tab2:
     st.plotly_chart(co2_plot)
 
 with tab3:
+    # define selector utilities
+    col1, col2 = st.columns(2)
+    if col1.button('Select All Hourly Variables'):
+        for v in utilities.hourly_variables:
+            ss[v] = True
+    if col2.button('Deselect All hourly Variables'):
+        for v in utilities.hourly_variables:
+            ss[v] = False
+    col1, col2 = st.columns(2)
+    if col1.button('Select All Daily Variables'):
+        for v in utilities.daily_variables:
+            ss[v] = True
+    if col2.button('Deselect All Daily Variables'):
+        for v in utilities.daily_variables:
+            ss[v] = False
+
+    # create download form
     with st.form('download_form'):
         begin_date = st.date_input('Begin Date',
                                    value=utilities.to_timestamp(past_limit_utc),
@@ -353,14 +375,13 @@ with tab3:
                                 width='stretch')
 
         st.write('Hourly Data')
-        selector_container = st.container()
         hourly_cols = itertools.cycle(st.columns(3))
-        hourly_checkboxes = [next(hourly_cols).checkbox(i) for i in utilities.hourly_variables]
+        hourly_checkboxes = [next(hourly_cols).checkbox(i, value=ss[i]) for i in utilities.hourly_variables]
 
 
         st.write('Daily Data')
         daily_cols = itertools.cycle(st.columns(3))
-        daily_checkboxes = [next(daily_cols).checkbox(i) for i in utilities.daily_variables]
+        daily_checkboxes = [next(daily_cols).checkbox(i, value=ss[i]) for i in utilities.daily_variables]
 
         submitted = st.form_submit_button("Fetch Data")
 
