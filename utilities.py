@@ -127,6 +127,7 @@ def convert_weather_data(input_weather_data, weather_units, preferred_units, tz=
             continue
     return weather_data
 
+@st.cache_data(ttl=900) # 15 minute cache
 def get_sunrise_sunset(location: str, start_date: str, end_date: str):
     # get sunrise data
     data = unified.fetch_unified('sunrise', 
@@ -156,6 +157,7 @@ def get_sunrise_sunset(location: str, start_date: str, end_date: str):
 
     return all_data
 
+@st.cache_data(ttl=900) # 15 minute cache
 def get_daily_weather_data(location, start_date, end_date):    
     daily_data = pd.DataFrame()
     daily_units = {}
@@ -176,7 +178,8 @@ def get_daily_weather_data(location, start_date, end_date):
     daily_data['date'] = pd.to_datetime(daily_data['date']).dt.tz_localize('UTC')
     
     return daily_data, daily_units
-    
+
+@st.cache_data(ttl=900) # 15 minute cache
 def get_hourly_weather_data(location, start_date, end_date):
     hourly_data = pd.DataFrame()
     hourly_units = {}
@@ -198,6 +201,7 @@ def get_hourly_weather_data(location, start_date, end_date):
 
     return hourly_data, hourly_units
 
+@st.cache_data(ttl=900) # 15 minute cache
 def get_all_weather_data(location: str, start_date: str, end_date: str):
     hourly_data = pd.DataFrame()
     hourly_units = {}
