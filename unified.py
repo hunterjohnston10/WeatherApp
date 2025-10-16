@@ -258,7 +258,7 @@ VARIABLES: Dict[str, VariableSpec] = {
     # UV (daily)
     "uv_index_max": VariableSpec(
         category="uv",
-        historical_url=OPEN_METEO_WEATHER_FORECAST,  # Open-Meteo allows historical via forecast endpoint for ERA5
+        historical_url=OPEN_METEO_WEATHER_ARCHIVE,  # Open-Meteo allows historical via forecast endpoint for ERA5
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="uv_index_max",
