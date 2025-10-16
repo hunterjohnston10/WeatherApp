@@ -3,3 +3,6 @@
 
 # ignore python specific files
 *.pyc
+
+# ignore created cache
+cache/

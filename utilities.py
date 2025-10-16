@@ -57,7 +57,7 @@ daily_variables = [
     'wind_direction_10m_dominant'
     ]
 def get_ureg():
-    ureg = pint.UnitRegistry()
+    ureg = pint.UnitRegistry(cache_folder='./cache/')
     ureg.load_definitions('weather_units.txt')
     return ureg
 ureg = get_ureg()
