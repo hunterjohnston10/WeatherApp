@@ -362,12 +362,10 @@ with tab3:
 
     # create download form
     with st.form('download_form'):
-        begin_date = st.date_input('Begin Date',
-                                   value=utilities.to_timestamp(past_limit_local),
+        begin_date, end_date = st.date_input('Date Range',
+                                   value=(utilities.to_timestamp(past_limit_local), 
+                                          utilities.to_timestamp(future_limit_local)),
                                    max_value=utilities.to_timestamp(future_limit_local))
-        end_date = st.date_input('End Date',
-                                 value=utilities.to_timestamp(future_limit_local),
-                                 max_value=utilities.to_timestamp(future_limit_local))
         
         format_radio = st.radio('Format',
                                 options=['JSON', 'CSV', 'Parquet'],
