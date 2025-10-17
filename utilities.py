@@ -99,6 +99,8 @@ def write_right(content, header='span'):
     return st.markdown(f"<{header} style='text-align: right'>{content}</{header}>", unsafe_allow_html=True)
 
 def pretty_print_unit(quantity):
+    if isinstance(quantity, str):
+        quantity = ureg(quantity)
     return f"{quantity.units:~#P}"
 
 def degree_to_compass(num):

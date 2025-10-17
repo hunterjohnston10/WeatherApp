@@ -5,10 +5,11 @@ import pandas as pd
 import pint_pandas
 from timezonefinder import TimezoneFinder
 import unified
-import json
 import itertools
 import streamlit_current_location
 from types import SimpleNamespace
+import numpy as np
+import json
 
 # define session state for checkboxes
 for v in utilities.hourly_variables + utilities.daily_variables:
@@ -413,6 +414,27 @@ with tab3:
         daily_data = data['data']['daily']
         units = data['units']
 
+        # convert units
+        for r in hourly_data:
+            for k in r.keys():
+                if r[k] == None:
+                    r[k] = np.nan
+                if k in preferred_units:
+                    r[k] = ureg.Quantity(r[k], ureg(units[k])).to(preferred_units[k]).magnitude
+        for r in daily_data:
+            for k in r.keys():
+                if r[k] == None:
+                    r[k] = np.nan
+                if k in preferred_units:
+                    r[k] = ureg.Quantity(r[k], ureg(units[k])).to(preferred_units[k]).magnitude
+        for k in units.keys():
+            if k in preferred_units:
+                units[k] = preferred_units[k]
+            # convert to pint-style units
+            utmp = ureg(units[k].strip().replace(' ', '_'))
+            utmp = f"{utmp.units}"
+            units[k] = utmp
+
         # create hourly and daily pandas files
         try:
             hourly_keys = list(hourly_data[0].keys())
@@ -427,7 +449,9 @@ with tab3:
                     ld.append(hd[k])
                     ld.append(hourly_units[k])
                 hd_pd.append(ld)
+                hd_pd.append(ld)
             hd_pd = pd.DataFrame(hd_pd, columns=header_row)
+            hd_pd = hd_pd.fillna(value=np.nan)
         except IndexError:
             hd_pd = pd.DataFrame()
 
@@ -449,10 +473,12 @@ with tab3:
             dd_pd = pd.DataFrame()
         
         if format_radio == 'JSON':
-            download_data = json.dumps(data, indent=4)
-            download_fname = 'weather_data_download.json'
+            # generate houly data file
+            st.download_button('Download Data', 
+                               data=json.dumps(data), 
+                               file_name='weather_data_download.json', 
+                               on_click='ignore')
         
-            st.download_button('Download Data', data=download_data, file_name=download_fname, on_click='ignore')
         elif format_radio == 'CSV':
             # generate houly data file
             st.download_button('Download Hourly Data', 
