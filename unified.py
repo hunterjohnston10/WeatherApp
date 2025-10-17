@@ -623,6 +623,11 @@ def fetch_unified(variable: str, location: str, mode: str, start_date: str, end_
             data['daily'].append(dict({"date": d} | {value_field: values[value_field][i] if i < len(values[value_field]) else None for value_field in value_fields}))
         units |= merged.get(units_key, {})
 
+    # clean missing units
+    for k, v in units.items():
+        if v == 'undefined':
+            units[k] = VARIABLES[k].default_unit
+
     result = {
         "metadata": {
             "variable": var,
