@@ -243,6 +243,10 @@ def get_all_weather_data(location: str, start_date: str, end_date: str):
     daily_data = pd.DataFrame.from_dict(data['data']['daily'])
     daily_data = daily_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in daily_variables})
     daily_data['date'] = pd.to_datetime(daily_data['date']).dt.tz_localize('UTC')
+
+    # change None data to NaN
+    daily_data = daily_data.fillna(value=np.nan)
+    hourly_data = hourly_data.fillna(value=np.nan)
     
     return hourly_data, hourly_units, daily_data, daily_units
 
