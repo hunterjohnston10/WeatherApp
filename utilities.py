@@ -72,6 +72,11 @@ def get_location(location, _geocoder):
     latlng = _geocoder(location).latlng
     return SimpleNamespace(latitude=latlng[0], longitude=latlng[1])
 
+@st.cache_data(ttl=86400) # 1 day cache
+def reverse_geocode(latlng_nmespce, _geocoder):
+    result = _geocoder([latlng_nmespce.latitude, latlng_nmespce.longitude], method='reverse')
+    return ', '.join([result.city, result.state, result.country])
+
 @st.cache_data(ttl=86400)
 def get_ip_location(ip_addr):
     location = geocoder.ip(ip_addr)

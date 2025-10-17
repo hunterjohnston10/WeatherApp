@@ -7,6 +7,8 @@ from timezonefinder import TimezoneFinder
 import unified
 import json
 import itertools
+import streamlit_current_location
+from types import SimpleNamespace
 
 # define session state for checkboxes
 for v in utilities.hourly_variables + utilities.daily_variables:
@@ -91,7 +93,12 @@ pint_pandas.PintType.ureg = ureg
 
 # input location as address, zip code, etc.
 try:
-    default_location = utilities.get_ip_location(st.context.ip_address)
+    # get user position
+    user_position = streamlit_current_location.current_position()
+    user_position = SimpleNamespace(latitude=user_position['latitude'], 
+                                    longitude=user_position['longitude'])
+    print(f'user current position is: {user_position}')
+    default_location = utilities.reverse_geocode(user_position, geocoder)
 except:
     default_location = "275 Ferst Dr NW, Atlanta, GA 30313"
 location = st.sidebar.text_input('Location (Street Address, Zip Code, etc.):', 
