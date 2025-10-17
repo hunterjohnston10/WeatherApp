@@ -22,6 +22,7 @@ class VariableSpec:
     forecast_url: str
     param_kind: str  # "hourly" | "daily"
     api_var_name: str
+    default_unit: str
 
 
 # Open-Meteo endpoints
@@ -39,6 +40,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="temperature_2m",
+        default_unit="\N{DEGREE SIGN}C"
     ),
     "apparent_temperature": VariableSpec(
         category="weather",
@@ -46,6 +48,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="apparent_temperature",
+        default_unit="\N{DEGREE SIGN}C"
     ),
     "relative_humidity_2m": VariableSpec(
         category="weather",
@@ -53,6 +56,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="relative_humidity_2m",
+        default_unit="%"
     ),
     "precipitation": VariableSpec(
         category="weather",
@@ -60,6 +64,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="precipitation",
+        default_unit="mm"
     ),
     "precipitation_probability": VariableSpec(
         category='weather',
@@ -67,6 +72,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="precipitation_probability",
+        default_unit="%"
     ),
     "snowfall": VariableSpec(
         category='weather',
@@ -74,6 +80,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="snowfall",
+        default_unit="cm"
     ),
     "pressure_msl": VariableSpec(
         category="weather",
@@ -81,6 +88,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="pressure_msl",
+        default_unit="hPa"
     ),
     "wind_speed_10m": VariableSpec(
         category="weather",
@@ -88,6 +96,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="wind_speed_10m",
+        default_unit='km/h'
     ),
     "wind_gusts_10m": VariableSpec(
         category="weather",
@@ -95,6 +104,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="wind_gusts_10m",
+        default_unit="km/h"
     ),
     "wind_direction_10m": VariableSpec(
         category="weather",
@@ -102,6 +112,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="wind_direction_10m",
+        default_unit="\N{DEGREE SIGN}"
     ),
     "visibility": VariableSpec(
         category="weather",
@@ -109,6 +120,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="visibility",
+        default_unit="m"
     ),
     "cloud_cover": VariableSpec(
         category="weather",
@@ -116,6 +128,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="cloud_cover",
+        default_unit="%"
     ),
     "evapotranspiration": VariableSpec(
         category="weather",
@@ -123,6 +136,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="evapotranspiration",
+        default_unit="mm"
     ),
     "weather_code": VariableSpec(
         category="weather",
@@ -130,6 +144,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="weather_code",
+        default_unit="WMO code"
     ),
 
     # Air quality (hourly)
@@ -139,6 +154,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="pm2_5",
+        default_unit="\u03bcg/m\u00b3"
     ),
     "pm10": VariableSpec(
         category="air_quality",
@@ -146,6 +162,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="pm10",
+        default_unit="\u03bcg/m\u00b3"
     ),
     "nitrogen_dioxide": VariableSpec(
         category="air_quality",
@@ -153,6 +170,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="nitrogen_dioxide",
+        default_unit="\u03bcg/m\u00b3"
     ),
     "carbon_monoxide": VariableSpec(
         category="air_quality",
@@ -160,6 +178,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="carbon_monoxide",
+        default_unit="\u03bcg/m\u00b3"
     ),
     "ozone": VariableSpec(
         category="air_quality",
@@ -167,6 +186,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="ozone",
+        default_unit="\u03bcg/m\u00b3"
     ),
     "sulphur_dioxide": VariableSpec(
         category="air_quality",
@@ -174,6 +194,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="sulphur_dioxide",
+        default_unit="\u03bcg/m\u00b3"
     ),
     "carbon_dioxide": VariableSpec(
         category="air_quality",
@@ -181,6 +202,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="carbon_dioxide",
+        default_unit="ppm"
     ),
     "us_aqi": VariableSpec(
         category="air_quality",
@@ -188,6 +210,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi",
+        default_unit="USAQI"
     ),
     "us_aqi_pm2_5": VariableSpec(
         category="air_quality",
@@ -195,6 +218,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi_pm2_5",
+        default_unit="USAQI"
     ),
     "us_aqi_pm10": VariableSpec(
         category="air_quality",
@@ -202,6 +226,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi_pm10",
+        default_unit="USAQI"
     ),
     "us_aqi_nitrogen_dioxide": VariableSpec(
         category="air_quality",
@@ -209,6 +234,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi_nitrogen_dioxide",
+        default_unit="USAQI"
     ),
     "us_aqi_ozone": VariableSpec(
         category="air_quality",
@@ -216,6 +242,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi_ozone",
+        default_unit="USAQI"
     ),
     "us_aqi_sulphur_dioxide": VariableSpec(
         category="air_quality",
@@ -223,6 +250,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi_sulphur_dioxide",
+        default_unit="USAQI"
     ),
     "us_aqi_carbon_monoxide": VariableSpec(
         category="air_quality",
@@ -230,6 +258,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_AIR_QUALITY,
         param_kind="hourly",
         api_var_name="us_aqi_carbon_monoxide",
+        default_unit="USAQI"
     ),
 
     # sun radiation (hourly)
@@ -239,6 +268,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="direct_radiation",
+        default_unit="W/m\u00b2"
     ),
     "direct_normal_irradiance": VariableSpec(
         category="uv",
@@ -246,6 +276,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="direct_normal_irradiance",
+        default_unit="W/m\u00b2"
     ),
     "diffuse_radiation": VariableSpec(
         category="uv",
@@ -253,6 +284,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="hourly",
         api_var_name="diffuse_radiation",
+        default_unit="W/m\u00b2"
     ),
 
     # UV (daily)
@@ -262,6 +294,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="uv_index_max",
+        default_unit="Index"
     ),
 
     # Weather (daily)
@@ -271,6 +304,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="temperature_2m_max",
+        default_unit="\N{DEGREE SIGN}C"
     ),
     "temperature_2m_min": VariableSpec(
         category="weather",
@@ -278,6 +312,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="temperature_2m_min",
+        default_unit="\N{DEGREE SIGN}C"
     ),
     "apparent_temperature_max": VariableSpec(
         category="weather",
@@ -285,6 +320,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="apparent_temperature_max",
+        default_unit="\N{DEGREE SIGN}C"
     ),
     "apparent_temperature_min": VariableSpec(
         category="weather",
@@ -292,6 +328,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="apparent_temperature_min",
+        default_unit="\N{DEGREE SIGN}C"
     ),
     "precipitation_sum": VariableSpec(
         category="weather",
@@ -299,6 +336,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="precipitation_sum",
+        default_unit="mm"
     ),
     "rain_sum": VariableSpec(
         category="weather",
@@ -306,6 +344,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="rain_sum",
+        default_unit="mm"
     ),
     "showers_sum": VariableSpec(
         category="weather",
@@ -313,6 +352,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="showers_sum",
+        default_unit="mm"
     ),
     "snowfall_sum": VariableSpec(
         category="weather",
@@ -320,6 +360,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="snowfall_sum",
+        default_unit="cm"
     ),
     "precipitation_hours": VariableSpec(
         category="weather",
@@ -327,6 +368,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="precipitation_hours",
+        default_unit="hours"
     ),
     "precipitation_probability_max": VariableSpec(
         category="weather",
@@ -334,6 +376,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="precipitation_probability_max",
+        default_unit="%"
     ),
     "precipitation_probability_mean": VariableSpec(
         category="weather",
@@ -341,6 +384,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="precipitation_probability_mean",
+        default_unit="%"
     ),
     "precipitation_probability_min": VariableSpec(
         category="weather",
@@ -348,6 +392,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="precipitation_probability_min",
+        default_unit="%"
     ),
     "weather_code_daily": VariableSpec(
         category="weather",
@@ -355,6 +400,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="weather_code",
+        default_unit="WMO code"
     ),
     "sunrise": VariableSpec(
         category="weather",
@@ -362,6 +408,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="sunrise",
+        default_unit="iso8601"
     ),
     "sunset": VariableSpec(
         category="weather",
@@ -369,6 +416,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="sunset",
+        default_unit="iso8601"
     ),
     "wind_speed_10m_max": VariableSpec(
         category="weather",
@@ -376,6 +424,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="wind_speed_10m_max",
+        default_unit="km/h"
     ),
     "wind_gusts_10m_max": VariableSpec(
         category="weather",
@@ -383,6 +432,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="wind_gusts_10m_max",
+        default_unit="km/h"
     ),
     "wind_direction_10m_dominant": VariableSpec(
         category="weather",
@@ -390,6 +440,7 @@ VARIABLES: Dict[str, VariableSpec] = {
         forecast_url=OPEN_METEO_WEATHER_FORECAST,
         param_kind="daily",
         api_var_name="wind_direction_10m_dominant",
+        default_unit="\N{DEGREE SIGN}"
     ),
 }
 
