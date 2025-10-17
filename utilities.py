@@ -6,6 +6,7 @@ import plotly.graph_objects as go
 import pint_pandas
 import geocoder
 from types import SimpleNamespace
+import numpy as np
 
 # define useful constants
 hourly_variables = [
@@ -181,6 +182,9 @@ def get_daily_weather_data(location, start_date, end_date):
     daily_data = pd.DataFrame.from_dict(data['data']['daily'])
     daily_data = daily_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in daily_variables})
     daily_data['date'] = pd.to_datetime(daily_data['date']).dt.tz_localize('UTC')
+
+    # fill None data to NaN
+    daily_data = daily_data.fillna(value=np.nan)
     
     return daily_data, daily_units
 
@@ -203,6 +207,9 @@ def get_hourly_weather_data(location, start_date, end_date):
     hourly_data = pd.DataFrame.from_dict(data['data']['hourly'])
     hourly_data = hourly_data.rename(columns={unified.VARIABLES[variable].api_var_name: variable for variable in hourly_variables})
     hourly_data['timestamp_utc'] = pd.to_datetime(hourly_data['timestamp_utc']).dt.tz_localize('UTC')
+
+    # change None data to NaN
+    hourly_data = hourly_data.fillna(value=np.nan)
 
     return hourly_data, hourly_units
 
