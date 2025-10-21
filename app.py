@@ -315,6 +315,18 @@ with tab2:
     )
     st.plotly_chart(pressure_plot)
 
+    # create windspeed plot
+    pressure_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['wind_speed_10m', 'wind_gusts_10m'],
+        weather_names=['Wind Speed', 'Wind Gusts'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['wind_speed_10m'])),
+        title='Wind Speed',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
+    st.plotly_chart(pressure_plot)
+
     # create uv plot
     uv_plot = utilities.create_forecast_plot(
         hourly_data=filtered_weather_data,
