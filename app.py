@@ -139,19 +139,26 @@ past_limit_local = current_date_local - 7 * day_delta
 future_limit_local = current_date_local + 3 * day_delta
 
 with tab1:
+    # insert picker for date
+    selected_date = pd.to_datetime(st.date_input("Select Date", 
+                  value=current_date_local, 
+                  min_value=current_date_local, 
+                  max_value=current_date_local+2*day_delta,
+                  format="MM/DD/YYYY")).tz_localize(user_timezone)
+
     # get sun data
     sunrise_sunset_data = utilities.get_sunrise_sunset(f"{coordinates.latitude},{coordinates.longitude}",
                                                 utilities.to_timestamp(yesterday_date_utc),
-                                                utilities.to_timestamp(tomorrow_date_utc))
+                                                utilities.to_timestamp(future_limit_utc))
     
     # get sunrise and sunset times for current local time
     sunrise_data = sunrise_sunset_data['sunrise']
-    sunrise_time = sunrise_data[(sunrise_data >= current_date_local) 
-                                & (sunrise_data < tomorrow_date_local)].dt.tz_convert(tz=user_timezone).iloc[0]
+    sunrise_time = sunrise_data[(sunrise_data >= selected_date) 
+                                & (sunrise_data < selected_date + day_delta)].dt.tz_convert(tz=user_timezone).iloc[0]
 
     sunset_data = sunrise_sunset_data['sunset']
-    sunset_time = sunset_data[(sunset_data >= current_date_local) 
-                            & (sunset_data < tomorrow_date_local)].dt.tz_convert(tz=user_timezone).iloc[0]
+    sunset_time = sunset_data[(sunset_data >= selected_date) 
+                            & (sunset_data < selected_date + day_delta)].dt.tz_convert(tz=user_timezone).iloc[0]
 
     # Display sunrise and sunset information
     sunrise_col, sunset_col = st.columns(2)
@@ -168,7 +175,7 @@ with tab1:
     hourly_weather_data, hourly_weather_units, daily_weather_data, daily_weather_units = utilities.get_all_weather_data(
                                                 f"{coordinates.latitude},{coordinates.longitude}",
                                                 utilities.to_timestamp(yesterday_date_utc),
-                                                utilities.to_timestamp(tomorrow_date_utc))
+                                                utilities.to_timestamp(future_limit_utc))
 
     # get daily weather data
     weather_data_daily = utilities.convert_weather_data(daily_weather_data, 
@@ -177,13 +184,13 @@ with tab1:
                                                         tz=user_timezone)
 
     # separate weather data between today and tomorrow
-    today_daily_weather = weather_data_daily[(weather_data_daily['date'] >= current_date_local) 
-                            & (weather_data_daily['date'] < tomorrow_date_local)].iloc[0]
+    today_daily_weather = weather_data_daily[(weather_data_daily['date'] >= selected_date) 
+                            & (weather_data_daily['date'] < selected_date + day_delta)].iloc[0]
 
     # display weather for today
-    utilities.write_centered('Today Overview', header='h1')
+    utilities.write_centered('Overview', header='h1')
     utilities.write_centered(
-        f"Today's forecast is {utilities.translate_weather_code(today_daily_weather['weather_code_daily'].magnitude)}",
+        f"Forecast is {utilities.translate_weather_code(today_daily_weather['weather_code_daily'].magnitude)}",
         header='h2')
 
 
@@ -196,7 +203,7 @@ with tab1:
                                                 tz=user_timezone)
 
     for hour_offset in range(24):
-        this_hour = current_date_local + one_hour_delta * hour_offset
+        this_hour = selected_date + one_hour_delta * hour_offset
         next_hour = this_hour + one_hour_delta
 
         this_hour_data = weather_data[(weather_data['timestamp_utc'] >= this_hour) & 
