@@ -35,7 +35,7 @@ tab1, tab2, tab3 = st.tabs(["Weather Overview", "Time-Series View", "Data Downlo
 
 # select units
 units = st.sidebar.selectbox('Units Preference',
-                     ('Metric', 'Conventional'))
+                     ('U.S. Customary', 'Metric'))
 
 ureg = utilities.ureg
 if units == 'Metric':
