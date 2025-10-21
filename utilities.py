@@ -417,7 +417,8 @@ def generate_current_summary(current_data):
                 st.metric(
                     "Apparent Temperature",
                     f'{current_data["apparent_temperature"].magnitude:.1f} {temperature_unit}',
-                    width='content'
+                    width='content',
+                    help="Apparent temperature is the perceived feels-like temperature combining wind chill factor, relative humidity and solar radiation"
                 )
 
             with c3:
@@ -463,7 +464,8 @@ def generate_current_summary(current_data):
                 st.metric(
                     "Gusts",
                     f"{current_data['wind_gusts_10m'].magnitude:.1f} {wind_unit}",
-                    width='content'
+                    width='content',
+                    help="Gusts at 10 meters above ground as a maximum of the preceding hour"
                 )     
 
             with c3:
@@ -486,7 +488,8 @@ def generate_current_summary(current_data):
                 st.metric(
                     "Pressure",
                     f"{current_data['pressure_msl'].magnitude:.1f} {pressure_unit}",
-                    width='content'
+                    width='content',
+                    help="Atmospheric air pressure reduced to mean sea level (msl) or pressure at surface. Typically pressure on mean sea level is used in meteorology."
                 )     
 
             with c3:
@@ -502,21 +505,24 @@ def generate_current_summary(current_data):
                 st.metric(
                     "Dew Point",
                     f"{current_data['dew_point_2m'].magnitude:.1f} {temperature_unit}",
-                    width='content'
+                    width='content',
+                    help="Dew point is the temperature at which the air must be cooled to for condensation to occur, meaning the air is holding its maximum amount of water vapor and can't hold any more. A higher dew point means there is more moisture in the air and it will feel more humid and sticky. For example, a dew point above 65\N{DEGREE SIGN}F (18\N{DEGREE SIGN}C) feels very humid, while a dew point of 55\N{DEGREE SIGN}F (13\N{DEGREE SIGN}C) or lower feels dry and comfortable."
                 )  
 
             with c2:
                 st.metric(
                     "Evapotranspiration",
                     f"{current_data['evapotranspiration'].magnitude:.1f} {evapo_unit}",
-                    width='content'
+                    width='content',
+                    help='Preceeding hour sum of evapotranspiration from land surface and plants that weather models assume for this location. Available soil water is considered. 1 inch of evapotranspiration per hour equals 0.47 gallons of water per square yard. (1mm = 1 litre of water per square meter)'
                 )     
 
             with c3:
                 st.metric(
                     "Vapor Pressure Deficit",
                     f"{current_data['vapor_pressure_deficit'].magnitude:.1f} {pressure_unit}",
-                    width='content'
+                    width='content',
+                    help="For high VPD (> 0.47 inHg, 1.6 kPa), water transpiration of plants increases. For low VPD (< 0.12 inHg, 0.4 kPa), transpiration decreases"
                 )
 
         with st.container(horizontal=True, gap='small'):
@@ -525,21 +531,24 @@ def generate_current_summary(current_data):
                 st.metric(
                     "Direct Radiation",
                     f"{current_data['direct_radiation'].magnitude:.1f} {solar_unit}",
-                    width='content'
+                    width='content',
+                    help="Direct solar radiation as average of the preceding hour on the horizontal plane"
                 )  
 
             with c2:
                 st.metric(
                     "Direct Normal Irradiance",
                     f"{current_data['direct_normal_irradiance'].magnitude:.1f} {solar_unit}",
-                    width='content'
+                    width='content',
+                    help="Direct solar radiation as average of the preceding hour on the normal plane (perpendicular to the sun)"
                 )     
 
             with c3:
                 st.metric(
                     "Diffuse Radiation",
                     f"{current_data['diffuse_radiation'].magnitude:.1f} {solar_unit}",
-                    width='content'
+                    width='content',
+                    help="Diffuse solar radiation as average of the preceding hour"
                 )    
 
     return container
