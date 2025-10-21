@@ -401,6 +401,7 @@ def generate_current_summary(current_data):
     pressure_unit = pretty_print_unit(current_data['pressure_msl'])
     solar_unit = pretty_print_unit(current_data['direct_radiation'])
     evapo_unit = pretty_print_unit(current_data['evapotranspiration'])
+    vap_pres_unit = pretty_print_unit(current_data['vapor_pressure_deficit'])
 
     container = st.container()
     with container:
@@ -520,7 +521,7 @@ def generate_current_summary(current_data):
             with c3:
                 st.metric(
                     "Vapor Pressure Deficit",
-                    f"{current_data['vapor_pressure_deficit'].magnitude:.1f} {pressure_unit}",
+                    f"{current_data['vapor_pressure_deficit'].magnitude:.1f} {vap_pres_unit}",
                     width='content',
                     help="For high VPD (> 0.47 inHg, 1.6 kPa), water transpiration of plants increases. For low VPD (< 0.12 inHg, 0.4 kPa), transpiration decreases"
                 )
@@ -552,6 +553,10 @@ def generate_current_summary(current_data):
                 )    
 
     return container
+
+def generate_hour_short_summary(current_data):
+    temperature_unit = pretty_print_unit(current_data['temperature_2m'])
+    return f'Feels Like: {current_data["apparent_temperature"].magnitude:.1f} {temperature_unit} -- Rain: {current_data["precipitation_probability"].magnitude:.0f} %'
 
 def create_aqi_plot(aqi_data, title):
 

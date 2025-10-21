@@ -195,54 +195,56 @@ with tab1:
                                                 preferred_units,
                                                 tz=user_timezone)
 
-    this_hour = current_time_local.floor('h')
-    next_hour = current_time_local.ceil('h')
+    for hour_offset in range(24):
+        this_hour = current_date_local + one_hour_delta * hour_offset
+        next_hour = this_hour + one_hour_delta
 
-    this_hour_data = weather_data[(weather_data['timestamp_utc'] >= this_hour) & 
-                                  (weather_data['timestamp_utc'] < next_hour)]
+        this_hour_data = weather_data[(weather_data['timestamp_utc'] >= this_hour) & 
+                                    (weather_data['timestamp_utc'] < next_hour)]
 
-    # weird stuff is happening with this slice, so enforce a pandas series
-    if len(this_hour_data) > 1:
-        raise RuntimeError("Error in retrieving this hour's data")
-    else:
-        this_hour_data = this_hour_data.T.squeeze()
+        # weird stuff is happening with this slice, so enforce a pandas series
+        if len(this_hour_data) > 1:
+            raise RuntimeError("Error in retrieving this hour's data")
+        else:
+            this_hour_data = this_hour_data.T.squeeze()
 
-    utilities.write_centered('Right Now Overview', header='h1')
-    utilities.write_centered(
-        f"The current conditions are {utilities.translate_weather_code(this_hour_data['weather_code'].magnitude)}",
-        header='h2')
+        is_expanded = (this_hour == current_time_local.floor('h'))
+        with st.expander(utilities.to_12_hr_format(this_hour) + ' -- ' + utilities.generate_hour_short_summary(this_hour_data), expanded=is_expanded):
+            utilities.write_centered(
+                f"{utilities.translate_weather_code(this_hour_data['weather_code'].magnitude)}",
+                header='h2')
 
-    utilities.generate_current_summary(this_hour_data)
+            utilities.generate_current_summary(this_hour_data)
 
-    # generate air quality information
-    utilities.write_centered('Air Quality', header='h1')
-    st.plotly_chart(utilities.create_aqi_plot(this_hour_data['us_aqi'].magnitude, 'AQI'))
+            # generate air quality information
+            utilities.write_centered('Air Quality', header='h1')
+            st.plotly_chart(utilities.create_aqi_plot(this_hour_data['us_aqi'].magnitude, 'AQI'), key=f"AQI_{this_hour}")
 
-    air_quality_subindices = [
-        ["us_aqi_pm2_5", "PM 2.5"],
-        ["us_aqi_pm10", "PM 10"],
-        ["us_aqi_nitrogen_dioxide", "Nitrogen Dioxide"],
-        ["us_aqi_ozone", "Ozone"],
-        ["us_aqi_sulphur_dioxide", "Sulphur Dioxide"],
-        ["us_aqi_carbon_monoxide", "Carbon Monoxide"]
-    ]
-    aqi_row1 = st.columns(3)
-    aqi_row2 = st.columns(3)
-    for col, (var, natural_name) in zip((aqi_row1 + aqi_row2), air_quality_subindices):
-        tile = col.container(gap=None)
-        tile.plotly_chart(utilities.create_aqi_plot(this_hour_data[var].magnitude, natural_name))
+            air_quality_subindices = [
+                ["us_aqi_pm2_5", "PM 2.5"],
+                ["us_aqi_pm10", "PM 10"],
+                ["us_aqi_nitrogen_dioxide", "Nitrogen Dioxide"],
+                ["us_aqi_ozone", "Ozone"],
+                ["us_aqi_sulphur_dioxide", "Sulphur Dioxide"],
+                ["us_aqi_carbon_monoxide", "Carbon Monoxide"]
+            ]
+            aqi_row1 = st.columns(3)
+            aqi_row2 = st.columns(3)
+            for col, (var, natural_name) in zip((aqi_row1 + aqi_row2), air_quality_subindices):
+                tile = col.container(gap=None)
+                tile.plotly_chart(utilities.create_aqi_plot(this_hour_data[var].magnitude, natural_name), key=f"{var}_{this_hour}")
 
-    with st.expander('Detailed Air Quality Data'):
-        air_quality_info = pd.DataFrame([
-            ["PM 2.5", f"{this_hour_data['pm2_5'].magnitude} {utilities.pretty_print_unit(this_hour_data['pm2_5'])}"],
-            ["PM 10", f"{this_hour_data['pm10'].magnitude} {utilities.pretty_print_unit(this_hour_data['pm10'])}"],
-            ["Nitrogen Dioxide", f"{this_hour_data['nitrogen_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['nitrogen_dioxide'])}"],
-            ["Carbon Monoxide", f"{this_hour_data['carbon_monoxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['carbon_monoxide'])}"],
-            ["Ozone", f"{this_hour_data['ozone'].magnitude} {utilities.pretty_print_unit(this_hour_data['ozone'])}"],
-            ["Sulphur Dioxide", f"{this_hour_data['sulphur_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['sulphur_dioxide'])}"],
-            ["Carbon Dioxide", f"{this_hour_data['carbon_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['carbon_dioxide'])}"],
-        ])
-        st.dataframe(air_quality_info)
+            with st.expander('Detailed Air Quality Data'):
+                air_quality_info = pd.DataFrame([
+                    ["PM 2.5", f"{this_hour_data['pm2_5'].magnitude} {utilities.pretty_print_unit(this_hour_data['pm2_5'])}"],
+                    ["PM 10", f"{this_hour_data['pm10'].magnitude} {utilities.pretty_print_unit(this_hour_data['pm10'])}"],
+                    ["Nitrogen Dioxide", f"{this_hour_data['nitrogen_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['nitrogen_dioxide'])}"],
+                    ["Carbon Monoxide", f"{this_hour_data['carbon_monoxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['carbon_monoxide'])}"],
+                    ["Ozone", f"{this_hour_data['ozone'].magnitude} {utilities.pretty_print_unit(this_hour_data['ozone'])}"],
+                    ["Sulphur Dioxide", f"{this_hour_data['sulphur_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['sulphur_dioxide'])}"],
+                    ["Carbon Dioxide", f"{this_hour_data['carbon_dioxide'].magnitude} {utilities.pretty_print_unit(this_hour_data['carbon_dioxide'])}"],
+                ])
+                st.dataframe(air_quality_info)
 
 with tab2:
 
