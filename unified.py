@@ -58,6 +58,14 @@ VARIABLES: Dict[str, VariableSpec] = {
         api_var_name="relative_humidity_2m",
         default_unit="%"
     ),
+    "dew_point_2m": VariableSpec(
+        category="weather",
+        historical_url=OPEN_METEO_WEATHER_ARCHIVE,
+        forecast_url=OPEN_METEO_WEATHER_FORECAST,
+        param_kind="hourly",
+        api_var_name="dew_point_2m",
+        default_unit="\N{DEGREE SIGN}C"
+    ),
     "precipitation": VariableSpec(
         category="weather",
         historical_url=OPEN_METEO_WEATHER_ARCHIVE,
