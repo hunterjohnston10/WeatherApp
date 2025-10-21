@@ -45,10 +45,12 @@ if units == 'Metric':
         'pressure_msl': 'hPa',
         'wind_speed_10m': 'kph',
         'apparent_temperature': 'degC',
+        'dew_point_2m': 'degC',
         'snowfall': 'cm',
         'wind_gusts_10m': 'kph',
         'visibility': 'kilometers',
         'evapotranspiration': 'mm',
+        'vapor_pressure_deficit': 'kPa',
         'temperature_2m_max': 'degC',
         'temperature_2m_min': 'degC',
         'apparent_temperature_max': 'degC',
@@ -71,10 +73,12 @@ else:
         'pressure_msl': 'inHg',
         'wind_speed_10m': 'mph',
         'apparent_temperature': 'degF',
+        'dew_point_2m': 'degF',
         'snowfall': 'in',
         'wind_gusts_10m': 'mph',
         'visibility': 'miles',
         'evapotranspiration': 'in',
+        'vapor_pressure_deficit': 'inHg',
         'temperature_2m_max': 'degF',
         'temperature_2m_min': 'degF',
         'apparent_temperature_max': 'degF',
@@ -303,6 +307,18 @@ with tab2:
     )
     st.plotly_chart(humidity_plot)
 
+    # create dew point plot
+    dewpoint_plot = utilities.create_forecast_plot(
+        hourly_data=filtered_weather_data,
+        weather_keys=['dew_point_2m'],
+        weather_names=['Dew Point'],
+        unit_name=utilities.pretty_print_unit(ureg(preferred_units['dew_point_2m'])),
+        title='Dew Point',
+        current_time=current_time_local,
+        future_time_limit=future_limit_local
+    )
+    st.plotly_chart(dewpoint_plot)
+
     # create pressure plot
     pressure_plot = utilities.create_forecast_plot(
         hourly_data=filtered_weather_data,
@@ -316,7 +332,7 @@ with tab2:
     st.plotly_chart(pressure_plot)
 
     # create windspeed plot
-    pressure_plot = utilities.create_forecast_plot(
+    windspeed_plot = utilities.create_forecast_plot(
         hourly_data=filtered_weather_data,
         weather_keys=['wind_speed_10m', 'wind_gusts_10m'],
         weather_names=['Wind Speed', 'Wind Gusts'],
@@ -325,7 +341,7 @@ with tab2:
         current_time=current_time_local,
         future_time_limit=future_limit_local
     )
-    st.plotly_chart(pressure_plot)
+    st.plotly_chart(windspeed_plot)
 
     # create uv plot
     uv_plot = utilities.create_forecast_plot(

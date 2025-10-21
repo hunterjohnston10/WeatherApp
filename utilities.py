@@ -13,6 +13,7 @@ hourly_variables = [
     "temperature_2m",
     "apparent_temperature",
     "relative_humidity_2m",
+    "dew_point_2m",
     "precipitation",
     "precipitation_probability",
     "snowfall",
@@ -39,7 +40,9 @@ hourly_variables = [
     "us_aqi_carbon_monoxide",
     "direct_radiation",
     "direct_normal_irradiance",
-    "diffuse_radiation"]
+    "diffuse_radiation",
+    "evapotranspiration",
+    "vapor_pressure_deficit"]
 daily_variables = [
     'uv_index_max',
     'temperature_2m_max',
@@ -397,6 +400,7 @@ def generate_current_summary(current_data):
     visibility_unit = pretty_print_unit(current_data['visibility'])
     pressure_unit = pretty_print_unit(current_data['pressure_msl'])
     solar_unit = pretty_print_unit(current_data['direct_radiation'])
+    evapo_unit = pretty_print_unit(current_data['evapotranspiration'])
 
     container = st.container()
     with container:
@@ -489,6 +493,29 @@ def generate_current_summary(current_data):
                 st.metric(
                     "Cloud Cover",
                     f"{current_data['cloud_cover'].magnitude:.1f} %",
+                    width='content'
+                )
+
+        with st.container(horizontal=True, gap='small'):
+            c1, c2, c3 = st.columns(3)
+            with c1:
+                st.metric(
+                    "Dew Point",
+                    f"{current_data['dew_point_2m'].magnitude:.1f} {temperature_unit}",
+                    width='content'
+                )  
+
+            with c2:
+                st.metric(
+                    "Evapotranspiration",
+                    f"{current_data['evapotranspiration'].magnitude:.1f} {evapo_unit}",
+                    width='content'
+                )     
+
+            with c3:
+                st.metric(
+                    "Vapor Pressure Deficit",
+                    f"{current_data['vapor_pressure_deficit'].magnitude:.1f} {pressure_unit}",
                     width='content'
                 )
 

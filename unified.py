@@ -146,6 +146,14 @@ VARIABLES: Dict[str, VariableSpec] = {
         api_var_name="evapotranspiration",
         default_unit="mm"
     ),
+    "vapor_pressure_deficit": VariableSpec(
+        category="weather",
+        historical_url=OPEN_METEO_WEATHER_ARCHIVE,
+        forecast_url=OPEN_METEO_WEATHER_FORECAST,
+        param_kind="hourly",
+        api_var_name="vapor_pressure_deficit",
+        default_unit="kPa"
+    ),
     "weather_code": VariableSpec(
         category="weather",
         historical_url=OPEN_METEO_WEATHER_ARCHIVE,
