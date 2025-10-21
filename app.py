@@ -143,7 +143,7 @@ with tab1:
     selected_date = pd.to_datetime(st.date_input("Select Date", 
                   value=current_date_local, 
                   min_value=current_date_local, 
-                  max_value=current_date_local+2*day_delta,
+                  max_value=future_limit_local,
                   format="MM/DD/YYYY")).tz_localize(user_timezone)
 
     # get sun data
